@@ -48,18 +48,24 @@ public class Views {
         /// Third argument is Column span
         /// Fourth argument is Row span
         ScrollPane metadataDisplay = new ScrollPane();
-        // TODO: Create search
+
+        TextField searchField = new TextField();
+        gpretval.add(searchField, 0, 0, 2, 1);
+        Button searchButton = new Button("Search Tag");
+        gpretval.add(searchButton, 2, 0);
+        // TODO: Create search functionality
+
         FlowPane contentPane = new FlowPane();
         metadataDisplay.setContent(contentPane);
         metadataDisplay.setMinHeight(400);
-        gpretval.add(metadataDisplay, 0, 0, 3, 1);
+        gpretval.add(metadataDisplay, 0, 1, 3, 1);
 
         ImageView chosenImage = new ImageView();
         chosenImage.setFitWidth(300);
         chosenImage.setPreserveRatio(true);
         BorderPane border = new BorderPane();
         border.setCenter(chosenImage);
-        gpretval.add(border, 3, 0);
+        gpretval.add(border, 3, 1);
 
         Label fileChoiceLabel = new Label("File:");
         gpretval.add(fileChoiceLabel, 0, 3);

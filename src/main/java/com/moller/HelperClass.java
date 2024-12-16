@@ -2,17 +2,12 @@ package com.moller;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
-
 import org.apache.commons.imaging.Imaging;
 import org.apache.commons.imaging.ImagingException;
-import org.apache.commons.imaging.common.ImageMetadata;
 import org.apache.commons.imaging.formats.jpeg.JpegImageMetadata;
 import org.apache.commons.imaging.formats.tiff.TiffField;
 import org.apache.commons.imaging.formats.tiff.TiffImageMetadata;
 import org.apache.commons.imaging.formats.tiff.write.TiffOutputSet;
-
-import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -20,51 +15,6 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 
 public class HelperClass {
-
-    // Testing
-    public static void PrintMetadataInfo() {
-        try {
-            ImageMetadata metadata = Imaging.getMetadata(new File(
-                    "C:\\source\\exif-editor\\src\\main\\resources\\com\\moller\\Images\\IMG_20241209_120112947_HDR.jpg"));
-
-            if (metadata != null) {
-
-                JpegImageMetadata jpegmetadata = (JpegImageMetadata) metadata;
-                TiffImageMetadata tiffData = jpegmetadata.getExif();
-
-                List<TiffField> tiffList = tiffData.getAllFields();
-
-                for (TiffField tiffThing : tiffList) {
-                    System.out.println(tiffThing.getTagName());
-                    System.out.println(tiffThing.getValue());
-                }
-
-                // List itemList = metadata.getItems();
-
-                // for (Object metadataObject : itemList) {
-                // if (metadataObject.getClass() == TiffMetadataItem.class) {
-                // TiffMetadataItem currentItem = (TiffMetadataItem) metadataObject;
-                // System.out.println(currentItem.getKeyword());
-                // System.out.println(currentItem.getText());
-                // }
-
-                // if (metadataObject.getClass() == GenericImageMetadataItem.class) {
-                // GenericImageMetadataItem currentItem = (GenericImageMetadataItem)
-                // metadataObject;
-                // System.out.println(currentItem.getKeyword());
-                // System.out.println(currentItem.getText());
-                // }
-
-                // }
-
-                System.out.println(metadata);
-            }
-
-        } catch (Exception e) {
-            System.out.print(e);
-        }
-    }
-
     public static FlowPane DisplayImageMetadata(FlowPane contentPane, File imgFile) {
 
         String fileType = imgFile.getAbsolutePath().split("\\.")[1].toLowerCase();
@@ -78,21 +28,9 @@ public class HelperClass {
                     TiffImageMetadata exifData = jpegMetadata.getExif();
 
                     for (TiffField metadataField : exifData.getAllFields()) {
-                        GridPane item = new GridPane();
-                        item.setPadding(new Insets(10, 10, 10, 10));
-                        Label fieldName = new Label();
-                        if (metadataField.getTagName().contains("Unknown Tag")) {
-                            fieldName.setText(
-                                    IdentifyEXIFTag(metadataField.getTagName()));
-                        } else {
-                            fieldName.setText(metadataField.getTagName());
-                        }
-                        item.add(fieldName, 0, 0);
-                        TextField value = new TextField();
-                        item.add(value, 0, 1);
-                        value.setText(metadataField.getValueDescription());
-
-                        contentPane.getChildren().add(item);
+                        contentPane.getChildren().add(
+                            ViewHelper.AddMetadataField(
+                                metadataField.getTagName(), metadataField.getValueDescription()));
                     }
                 }
                 break;
@@ -105,7 +43,7 @@ public class HelperClass {
     }
 
     // This will require maintenance I suppose
-    private static String IdentifyEXIFTag(String tagName) {
+    public static String IdentifyEXIFTag(String tagName) {
         String sretval = "";
         String hexValue = tagName.split("Tag ")[1];
 
