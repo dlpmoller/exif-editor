@@ -20,6 +20,7 @@ public class App extends Application {
         stage.setTitle("Babby's First EXIF Editor");
 
         // Sets the first page to the EditorPage in the Views class.
+        // By the way, don't make a Views class if you have multiple Views to make.
         Scene scene = new Scene(Views.EditorPage(stage), 800, 600);
         stage.setScene(scene);
 

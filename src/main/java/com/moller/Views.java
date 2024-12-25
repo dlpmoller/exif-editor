@@ -75,11 +75,11 @@ public class Views {
             @Override
             public void handle(Event e) {
                 FileChooser fileChooser = new FileChooser();
-                File selectedFile = fileChooser.showOpenDialog(stage);
                 FileChooser.ExtensionFilter fileFilter = new FileChooser.ExtensionFilter("Image Files (*.jpg, *.png)",
                         "*.jpg",
                         "*.png");
                 fileChooser.getExtensionFilters().add(fileFilter);
+                File selectedFile = fileChooser.showOpenDialog(stage);
                 if (selectedFile != null) {
                     fileChoiceField.setText(selectedFile.getAbsolutePath());
                 }
@@ -91,8 +91,9 @@ public class Views {
                 File imgFile = new File(newPath);
                 if (imgFile.exists()) {
                     try {
+                        contentPane.getChildren().clear();
                         chosenImage.setImage(new Image(imgFile.toURI().toURL().toExternalForm()));
-                        HelperClass.DisplayImageMetadata(contentPane, imgFile);
+                        ViewHelper.DisplayImageMetadata(contentPane, imgFile);
                     } catch (MalformedURLException e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
