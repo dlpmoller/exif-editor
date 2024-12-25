@@ -49,17 +49,23 @@ public class Views {
         /// Fourth argument is Row span
         ScrollPane metadataDisplay = new ScrollPane();
 
-        TextField searchField = new TextField();
-        gpretval.add(searchField, 0, 0, 2, 1);
-        Button searchButton = new Button("Search Tag");
-        gpretval.add(searchButton, 2, 0);
-        // TODO: Create search functionality
-
         FlowPane contentPane = new FlowPane();
         metadataDisplay.setContent(contentPane);
         metadataDisplay.setMinHeight(400);
         gpretval.add(metadataDisplay, 0, 1, 3, 1);
 
+        TextField searchField = new TextField();
+        searchField.setPromptText("Search Tag");
+        searchField.textProperty().addListener(new ChangeListener<String>() {
+
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldSearchTerm,
+                    String newSearchTerm) {
+                ViewHelper.FilterShownTags(contentPane, newSearchTerm);
+            }
+
+        });
+        gpretval.add(searchField, 0, 0, 3, 1);
         ImageView chosenImage = new ImageView();
         chosenImage.setFitWidth(300);
         chosenImage.setPreserveRatio(true);

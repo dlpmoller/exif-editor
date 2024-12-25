@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.HashMap;
 
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.FlowPane;
@@ -21,12 +22,14 @@ public class ViewHelper {
         } else {
             // Nested for loops due to nested hashmaps. Bad idea?
             for (var directory : metadataDirectories.entrySet()) {
+
                 GridPane directoryLabel = new GridPane();
                 directoryLabel.setPadding(new Insets(10, 10, 10, 10));
                 directoryLabel.setMinWidth(contentPane.getWidth());
                 directoryLabel.add(new Label(directory.getKey()), 0, 0);
                 contentPane.getChildren().add(directoryLabel);
                 for (var metadataEntry : directory.getValue().entrySet()) {
+
                     contentPane.getChildren().add(
                             ViewHelper.AddMetadataField(
                                     metadataEntry.getKey(), metadataEntry.getValue()));
@@ -51,6 +54,26 @@ public class ViewHelper {
         valueField.setText(value);
         gpretval.add(valueField, 0, 1);
         return gpretval;
+    }
+
+    public static void FilterShownTags(FlowPane contentPane, String searchTerm) {
+        if (!searchTerm.isEmpty() || !searchTerm.isBlank()) {
+            for (Node dataField : contentPane.getChildren()) {
+                GridPane tagField = (GridPane) dataField;
+                if (tagField.getChildren().size() > 1) {
+                    Label tag = (Label) tagField.getChildren().get(0);
+                    if (!tag.getText().toLowerCase().contains(searchTerm.toLowerCase())) {
+                        dataField.setDisable(true);
+                    } else {
+                        dataField.setDisable(false);
+                    }
+                }
+            }
+        } else {
+            for (Node dataField : contentPane.getChildren()) {
+                dataField.setDisable(false);
+            }
+        }
     }
 
 }
