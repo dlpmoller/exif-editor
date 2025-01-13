@@ -14,7 +14,11 @@ import org.apache.commons.imaging.formats.jpeg.iptc.PhotoshopApp13Data;
 import org.apache.commons.imaging.formats.tiff.TiffField;
 import org.apache.commons.imaging.formats.tiff.TiffImageMetadata;
 import org.apache.commons.imaging.formats.tiff.TiffImageMetadata.GpsInfo;
+import org.apache.commons.imaging.formats.tiff.write.TiffOutputDirectory;
 import org.apache.commons.imaging.formats.tiff.write.TiffOutputSet;
+
+import com.moller.Models.MetadataCharts;
+import com.moller.Models.MetadataObject;
 
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -64,22 +68,32 @@ public class HelperClass {
         // TODO: Getting the metadata can be made into it's own thing.
         TiffImageMetadata exifData = null;
         TiffOutputSet metadataChanges;
+        TiffOutputDirectory exifDirectory;
+        TiffOutputDirectory gpsDirectory;
+        TiffOutputDirectory rootDirectory;
+        Double latitude = null;
+        Double longitude = null;
         JpegImageMetadata jpegImageMetadata = GetMetadataFromImage(imgFile);
 
-        if (jpegImageMetadata != null) {
-            exifData = jpegImageMetadata.getExif();
-        }
-
-        if (exifData != null) {
-            try {
-                metadataChanges = exifData.getOutputSet();
-            } catch (ImagingException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+        try {
+            if (jpegImageMetadata != null) {
+                exifData = jpegImageMetadata.getExif();
             }
 
-        } else {
-            metadataChanges = new TiffOutputSet();
+            if (exifData != null) {
+
+                metadataChanges = exifData.getOutputSet();
+
+            } else {
+                metadataChanges = new TiffOutputSet();
+            }
+
+            exifDirectory = metadataChanges.getOrCreateExifDirectory();
+            gpsDirectory = metadataChanges.getOrCreateGpsDirectory();
+
+        } catch (ImagingException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
         // TODO: Directory name dictates OutputSet
         for (Node node : contentPane.getChildren()) {
@@ -89,12 +103,23 @@ public class HelperClass {
             if (metadataField.getChildren().size() == 1) {
                 // TODO: Create method to initialize and iterate through directories. Likely
                 // with Hashmaps again.
-                // TiffOutputDirectory exifOutput = metadataChanges.getOrCreateExifDirectory();
             }
+            // TODO: Add this part to ViewHelper
             Label tagField = (Label) metadataField.getChildren().get(0);
             TextField valueField = (TextField) metadataField.getChildren().get(1);
             // Test to see if value extraction works like that.
             System.out.println(tagField.getText() + ": " + valueField.getText());
+            // TODO: Find better way to implement tag selection
+            switch (tagField.getText()) {
+                case "LatitudeNorth":
+                    latitude = Double.valueOf(valueField.getText());
+                case "LongitudeEast":
+                    longitude = Double.valueOf(valueField.getText());
+                    break;
+
+                default:
+                    break;
+            }
         }
     }
 
@@ -132,8 +157,13 @@ public class HelperClass {
                     if (exifMetadata != null) {
 
                         HashMap<String, String> exifDirectory = new HashMap<>();
+                        MetadataObject[] listofobjects = MetadataCharts.GetExifDirectory();
 
+                        for (MetadataObject metadataObject : listofobjects) {
+                            System.out.println(metadataObject.getMetadataId());
+                        }
                         for (TiffField exifField : exifMetadata.getAllFields()) {
+                            // System.out.println(exifField.getTag());
                             if (exifField.getTagName().contains("GPSInfo")) {
                                 HashMap<String, String> gpsHashMap = GetGPSInfo(exifMetadata);
 
@@ -184,6 +214,7 @@ public class HelperClass {
             // Pull GPSInfo. May be null.
             GpsInfo gpsData = exifMetadata.getGpsInfo();
             if (gpsData != null) {
+
                 hmretval.put("LatitudeRef", gpsData.latitudeRef);
                 hmretval.put("LongitudeRef", gpsData.longitudeRef);
                 hmretval.put("LatitudeNorth", Double.toString(gpsData.getLatitudeAsDegreesNorth()));

@@ -97,6 +97,7 @@ public class Views {
                 File imgFile = new File(newPath);
                 if (imgFile.exists()) {
                     try {
+                        searchField.setText("");
                         contentPane.getChildren().clear();
                         chosenImage.setImage(new Image(imgFile.toURI().toURL().toExternalForm()));
                         ViewHelper.DisplayImageMetadata(contentPane, imgFile);
@@ -105,6 +106,7 @@ public class Views {
                         e.printStackTrace();
                     }
                 } else {
+                    searchField.setText("");
                     chosenImage.setImage(null);
                     contentPane.getChildren().clear();
                 }
@@ -122,7 +124,9 @@ public class Views {
                 DirectoryChooser directoryChooser = new DirectoryChooser();
 
                 File selectedDirectory = directoryChooser.showDialog(stage);
-                destinationField.setText(selectedDirectory.getAbsolutePath());
+                if (selectedDirectory != null && selectedDirectory.exists()) {
+                    destinationField.setText(selectedDirectory.getAbsolutePath());
+                }
             }
         });
         gpretval.add(destinationField, 1, 4, 2, 1);

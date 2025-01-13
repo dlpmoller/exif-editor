@@ -7,6 +7,7 @@ import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 
@@ -40,14 +41,15 @@ public class ViewHelper {
         return contentPane;
     }
 
-    public static GridPane AddMetadataField(String tag, String value) {
+    public static GridPane AddMetadataField(String tagName, String value) {
         GridPane gpretval = new GridPane();
         gpretval.setPadding(new Insets(10, 10, 10, 10));
         Label fieldName = new Label();
-        if (tag.contains("Unknown Tag")) {
-            fieldName.setText(HelperClass.IdentifyEXIFTag(tag));
+        fieldName.setTooltip(new Tooltip());
+        if (tagName.contains("Unknown Tag")) {
+            fieldName.setText(HelperClass.IdentifyEXIFTag(tagName));
         } else {
-            fieldName.setText(tag);
+            fieldName.setText(tagName);
         }
         gpretval.add(fieldName, 0, 0);
         TextField valueField = new TextField();
