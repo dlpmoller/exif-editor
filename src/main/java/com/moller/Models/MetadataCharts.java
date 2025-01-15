@@ -110,6 +110,35 @@ public class MetadataCharts {
                 new MetadataObject(0x01b5, "JPEGTables", null),
                 // TODO: How do I add this? List for dropdown?
                 new MetadataObject(0x0200, "JPEGProc", TiffTagConstants.TIFF_TAG_JPEG_PROC),
+                new MetadataObject(0x0201, "ThumbnailOffset", TiffTagConstants.TIFF_TAG_JPEG_INTERCHANGE_FORMAT),
+                new MetadataObject(0x0202, "ThumbnailLength", TiffTagConstants.TIFF_TAG_JPEG_INTERCHANGE_FORMAT_LENGTH),
+                new MetadataObject(0x0203, "JPEGRestartInterval", TiffTagConstants.TIFF_TAG_JPEG_RESTART_INTERVAL),
+                new MetadataObject(0x0205, "JPEGLosslessPredictors",
+                        TiffTagConstants.TIFF_TAG_JPEG_LOSSLESS_PREDICTORS),
+                new MetadataObject(0x0206, "JPEGPointTransforms", TiffTagConstants.TIFF_TAG_JPEG_POINT_TRANSFORMS),
+                new MetadataObject(0x0207, "JPEGQTables", TiffTagConstants.TIFF_TAG_JPEG_QTABLES),
+                new MetadataObject(0x0208, "JPEGDCTables", TiffTagConstants.TIFF_TAG_JPEG_DCTABLES),
+                new MetadataObject(0x0209, "JPEGACTables", TiffTagConstants.TIFF_TAG_JPEG_ACTABLES),
+                new MetadataObject(0x0211, "YCbCrCoefficients", TiffTagConstants.TIFF_TAG_YCBCR_COEFFICIENTS),
+                // TODO: How do I add this? List for dropdown?
+                new MetadataObject(0x0212, "YCbCrSubSampling", TiffTagConstants.TIFF_TAG_YCBCR_SUB_SAMPLING),
+                // TODO: How do I add this? List for dropdown?
+                new MetadataObject(0x0213, "YCbCrPositioning", TiffTagConstants.TIFF_TAG_YCBCR_POSITIONING),
+                new MetadataObject(0x0214, "ReferenceBlackWhite", TiffTagConstants.TIFF_TAG_REFERENCE_BLACK_WHITE),
+                new MetadataObject(0x022f, "StripRowCounts", null),
+                // TODO: How the hell am I gonna add XMP directory
+                new MetadataObject(0x02bc, "ApplicationNotes", null),
+                new MetadataObject(0x0303, "RenderingIntent", null),
+                new MetadataObject(0x03e7, "USPTOMiscellaneous", null),
+                new MetadataObject(0x1000, "RelatedImageFileFormat", null),
+                new MetadataObject(0x1001, "RelatedImageWidth", null),
+                new MetadataObject(0x1002, "RelatedImageHeight", null),
+                new MetadataObject(0x4746, "Rating", null),
+                new MetadataObject(0x4747, "XP_DIP_XML", null),
+                // Microsoft Stitch directory
+                new MetadataObject(0x4748, "StitchInfo", null),
+                new MetadataObject(0x4749, "RatingPercent", null),
+                new MetadataObject(0x5001, "ResolutionXUnit", null),
         };
     }
 
