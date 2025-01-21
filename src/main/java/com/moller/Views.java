@@ -81,9 +81,9 @@ public class Views {
             @Override
             public void handle(Event e) {
                 FileChooser fileChooser = new FileChooser();
-                FileChooser.ExtensionFilter fileFilter = new FileChooser.ExtensionFilter("Image Files (*.jpg, *.png)",
+                FileChooser.ExtensionFilter fileFilter = new FileChooser.ExtensionFilter("Image Files (*.jpg, *.jpeg)",
                         "*.jpg",
-                        "*.png");
+                        "*.jpeg");
                 fileChooser.getExtensionFilters().add(fileFilter);
                 File selectedFile = fileChooser.showOpenDialog(stage);
                 if (selectedFile != null) {

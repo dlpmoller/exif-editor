@@ -1,7 +1,12 @@
 package com.moller.Models;
 
+import org.apache.commons.imaging.formats.tiff.constants.GpsTagConstants;
 import org.apache.commons.imaging.formats.tiff.constants.TiffTagConstants;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoAscii;
 import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoLong;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoRational;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoRationals;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoShort;
 
 public class MetadataCharts {
     public static MetadataObject[] GetExifDirectory() {
@@ -266,32 +271,143 @@ public class MetadataCharts {
                 new MetadataObject(0x847e, "IntergraphPacketData", null),
                 new MetadataObject(0x847f, "IntergraphFlagRegisters", null),
                 new MetadataObject(0x8480, "IntergraphMatrix", null),
+                new MetadataObject(0x8481, "INGRReserved", null),
+                new MetadataObject(0x8482, "ModelTiePoint", null),
+                new MetadataObject(0x84e0, "Site", null),
+                new MetadataObject(0x84e1, "ColorSequence", null),
+                new MetadataObject(0x84e2, "IT8Header", null),
+                new MetadataObject(0x84e3, "RasterPadding", null),
+                new MetadataObject(0x84e4, "BitsPerRunLength", null),
+                new MetadataObject(0x84e5, "BitsPerExtendedRunLength", null),
+                new MetadataObject(0x84e6, "ColorTable", null),
+                new MetadataObject(0x84e7, "ImageColorIndicator", null),
+                new MetadataObject(0x84e8, "BackgroundColorIndicator", null),
+                new MetadataObject(0x84e9, "ImageColorValue", null),
+                new MetadataObject(0x84ea, "BackgroundColorValue", null),
+                new MetadataObject(0x84eb, "PixelIntensityRange", null),
+                new MetadataObject(0x84ec, "TransparencyIndicator", null),
+                new MetadataObject(0x84ed, "ColorCharacterization", null),
+                new MetadataObject(0x84ee, "HCUsage", null),
+                new MetadataObject(0x84ef, "TrapIndicator", null), // heheh
+                new MetadataObject(0x84f0, "CMYKEquivalent", null),
+                new MetadataObject(0x8546, "SEMInfo", null),
+                // new MetadataObject(0x8568, "AFCP_IPTC", null), //It's its own directory
+                new MetadataObject(0x85b8, "PixelMagicJBIGOptions", null),
+                new MetadataObject(0x85d7, "JPLCartoIFD", null),
+                new MetadataObject(0x85d8, "ModelTransform", null),
+                new MetadataObject(0x8602, "WB_GRGBLevels", null),
+                // new MetadataObject(0x8606, "LeafData", null), //It's its own directory
+                // new MetadataObject(0x8649, "PhotoshopSettings", null), //It's its own
+                // directory
+                // new MetadataObject(0x8769, "ExifOffset", null), //It's its own directory
+                // new MetadataObject(0x8773, "ICC_Profile", null), //It's its own directory
+                // TODO: How do I add this? List for dropdown?
+                new MetadataObject(0x877f, "TIFF_FXExtensions", null),
+                // TODO: How do I add this? List for dropdown?
+                new MetadataObject(0x8780, "MultiProfiles", null),
+                new MetadataObject(0x8781, "SharedData", null),
+                new MetadataObject(0x8782, "T88Options", null),
+                new MetadataObject(0x87ac, "ImageLayer", null),
+                // new MetadataObject(0x87af, "GeoTiffDirectory", null), //I guess it's its own
+                // directory?
+                new MetadataObject(0x87b0, "GeoTiffDoubleParams", null),
+                new MetadataObject(0x87b1, "GeoTiffAsciiParams", null),
+                new MetadataObject(0x87be, "JBIGOptions", null),
+                new MetadataObject(0x8822, "ExposureProgram", null),
+                // TODO: Add the rest of the tags. And create own tag writables at some point.
         };
     }
 
     public MetadataObject[] GetGPSDirectory() {
-        return new MetadataObject[] { new MetadataObject(1, "metadataTag", true) };
+        return new MetadataObject[] {
+                new MetadataObject(0x0000, "GPSVersionID", GpsTagConstants.GPS_TAG_GPS_VERSION_ID),
+                // TODO: How do I add this? List for dropdown?
+                new MetadataObject(0x0001, "GPSLatitudeRef", GpsTagConstants.GPS_TAG_GPS_LATITUDE_REF),
+                new MetadataObject(0x0002, "GPSLatitude", GpsTagConstants.GPS_TAG_GPS_LATITUDE),
+                // TODO: How do I add this? List for dropdown?
+                new MetadataObject(0x0003, "GPSLongitudeRef", GpsTagConstants.GPS_TAG_GPS_LONGITUDE_REF),
+                new MetadataObject(0x0004, "GPSLongitude", GpsTagConstants.GPS_TAG_GPS_LONGITUDE),
+                // TODO: How do I add this? List for dropdown?
+                new MetadataObject(0x0005, "GPSAltitudeRef", GpsTagConstants.GPS_TAG_GPS_ALTITUDE_REF),
+                new MetadataObject(0x0006, "GPSAltitude", GpsTagConstants.GPS_TAG_GPS_ALTITUDE),
+                new MetadataObject(0x0007, "GPSTimeStamp", GpsTagConstants.GPS_TAG_GPS_TIME_STAMP),
+                new MetadataObject(0x0008, "GPSSatellites", GpsTagConstants.GPS_TAG_GPS_SATELLITES),
+                // TODO: How do I add this? List for dropdown?
+                new MetadataObject(0x0009, "GPSStatus", GpsTagConstants.GPS_TAG_GPS_STATUS),
+                // TODO: How do I add this? List for dropdown?
+                new MetadataObject(0x000a, "GPSMeasureMode", GpsTagConstants.GPS_TAG_GPS_MEASURE_MODE),
+                new MetadataObject(0x000b, "GPSDOP", GpsTagConstants.GPS_TAG_GPS_DOP),
+                // TODO: How do I add this? List for dropdown?
+                new MetadataObject(0x000c, "GPSSpeedRef", GpsTagConstants.GPS_TAG_GPS_SPEED_REF),
+                new MetadataObject(0x000d, "GPSSpeed", GpsTagConstants.GPS_TAG_GPS_SPEED),
+                // TODO: How do I add this? List for dropdown?
+                new MetadataObject(0x000e, "GPSTrackRef", GpsTagConstants.GPS_TAG_GPS_TRACK_REF),
+                new MetadataObject(0x000f, "GPSTrack", GpsTagConstants.GPS_TAG_GPS_TRACK),
+                // TODO: How do I add this? List for dropdown?
+                new MetadataObject(0x0010, "GPSImgDirectionRef", GpsTagConstants.GPS_TAG_GPS_IMG_DIRECTION_REF),
+                new MetadataObject(0x0011, "GPSImgDirection", GpsTagConstants.GPS_TAG_GPS_IMG_DIRECTION),
+                new MetadataObject(0x0012, "GPSMapDatum", GpsTagConstants.GPS_TAG_GPS_MAP_DATUM),
+                // TODO: How do I add this? List for dropdown?
+                new MetadataObject(0x0013, "GPSDestLatitudeRef", GpsTagConstants.GPS_TAG_GPS_DEST_LATITUDE_REF),
+                new MetadataObject(0x0014, "GPSDestLatitude", GpsTagConstants.GPS_TAG_GPS_DEST_LATITUDE),
+                // TODO: How do I add this? List for dropdown?
+                new MetadataObject(0x0015, "GPSDestLongitudeRef", GpsTagConstants.GPS_TAG_GPS_DEST_LONGITUDE_REF),
+                new MetadataObject(0x0016, "GPSDestLongitude", GpsTagConstants.GPS_TAG_GPS_DEST_LONGITUDE),
+                // TODO: How do I add this? List for dropdown?
+                new MetadataObject(0x0017, "GPSDestBearingRef", GpsTagConstants.GPS_TAG_GPS_DEST_BEARING_REF),
+                new MetadataObject(0x0018, "GPSDestBearing", GpsTagConstants.GPS_TAG_GPS_DEST_BEARING),
+                // TODO: How do I add this? List for dropdown?
+                new MetadataObject(0x0019, "GPSDestDistanceRef", GpsTagConstants.GPS_TAG_GPS_DEST_DISTANCE_REF),
+                new MetadataObject(0x001a, "GPSDestDistance", GpsTagConstants.GPS_TAG_GPS_DEST_DISTANCE),
+                // TODO: How do I add this? List for dropdown?
+                new MetadataObject(0x001b, "GPSProcessingMethod", GpsTagConstants.GPS_TAG_GPS_PROCESSING_METHOD),
+                new MetadataObject(0x001c, "GPSAreaInformation", GpsTagConstants.GPS_TAG_GPS_AREA_INFORMATION),
+                new MetadataObject(0x001d, "GPSDateStamp", GpsTagConstants.GPS_TAG_GPS_DATE_STAMP),
+                // TODO: How do I add this? List for dropdown?
+                new MetadataObject(0x001e, "GPSDifferential", GpsTagConstants.GPS_TAG_GPS_DIFFERENTIAL),
+                new MetadataObject(0x001f, "GPSHPositioningError", null)
+        };
     }
 
     public MetadataObject[] GetIPTCDirectory() {
         return new MetadataObject[] { new MetadataObject(1, "metadataTag", true) };
     }
 
-    public Object convertTextValue(int tagId, String textField) {
-        // Could probably do with making this a singleton somewhere.
-        MetadataObject[] tiffTagArray = GetExifDirectory();
+    /**
+     * Quite simply, matches the {@code String} value with the tag's required data
+     * type and converts it if necessary.
+     *
+     * @param tag       The {@code MetadataObject} associated with the text field,
+     *                  used for the .getClass() method.
+     * @param textField The {@code TextField.getText} value of the {@code TextField}
+     *                  Node.
+     * @return Returns the value of the tag constant provided, if it's not null.
+     */
+    public Object convertTextValue(MetadataObject tag, String textField) {
+        Object tagClass = tag.writeTag();
 
-        for (MetadataObject metadataObject : tiffTagArray) {
-            if (tagId == metadataObject.getMetadataId()) {
-                Object tagConstant = metadataObject.writeTag();
-
-                if (tagConstant.getClass() == TagInfoLong.class) {
-                    // Perhaps?
-                    return Long.parseLong(textField);
-                }
-
-                break;
+        try {
+            if (tagClass.getClass() == TagInfoShort.class) {
+                return Short.valueOf(textField);
             }
+
+            if (tagClass.getClass() == TagInfoLong.class) {
+                return Long.valueOf(textField);
+            }
+
+            if (tagClass.getClass() == TagInfoRational.class) {
+
+            }
+
+            if (tagClass.getClass() == TagInfoRationals.class) {
+
+            }
+
+            if (tagClass.getClass() == TagInfoAscii.class) {
+                return textField;
+            }
+        } catch (NumberFormatException numFormEx) {
+            // TODO: handle exception
         }
         return null;
     }

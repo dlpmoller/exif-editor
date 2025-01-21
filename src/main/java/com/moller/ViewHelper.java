@@ -10,8 +10,17 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
 
 public class ViewHelper {
+    /**
+     * Iterates through the metadata directories to add all relevant data to the
+     * associated tags.
+     *
+     * @param contentPane The FlowPane to populate.
+     * @param imgFile     The image to read metadata from.
+     * @return Returns the provided FlowPane with data fields.
+     */
     public static FlowPane DisplayImageMetadata(FlowPane contentPane, File imgFile) {
         HashMap<String, HashMap<String, String>> metadataDirectories = new HashMap<>();
 
@@ -41,6 +50,15 @@ public class ViewHelper {
         return contentPane;
     }
 
+    /**
+     * Adds a single metadata tag in a {@code GridPane} element. Contains a
+     * {@code Label} element and a {@code TextField} element.
+     *
+     * @param tagName The name of the metadata tag.
+     * @param value   The associated value of the metadata tag, if any.
+     * @return Returns a {@code GridPane} element for the {@code FlowPane} element.
+     * @see ViewHelper#DisplayImageMetadata(FlowPane, File)
+     */
     public static GridPane AddMetadataField(String tagName, String value) {
         GridPane gpretval = new GridPane();
         gpretval.setPadding(new Insets(10, 10, 10, 10));
@@ -58,6 +76,13 @@ public class ViewHelper {
         return gpretval;
     }
 
+    /**
+     * Removes tag fields from view if they are not within the specified search
+     * scope
+     *
+     * @param contentPane The tags to iterate through
+     * @param searchTerm  The search scope to filter for
+     */
     public static void FilterShownTags(FlowPane contentPane, String searchTerm) {
         if (!searchTerm.isEmpty() || !searchTerm.isBlank()) {
             for (Node dataField : contentPane.getChildren()) {
@@ -66,6 +91,7 @@ public class ViewHelper {
                     Label tag = (Label) tagField.getChildren().get(0);
                     if (!tag.getText().toLowerCase().contains(searchTerm.toLowerCase())) {
                         dataField.setDisable(true);
+                        tagField.getColumnConstraints().get(0).setHgrow(Priority.NEVER);
                     } else {
                         dataField.setDisable(false);
                     }
