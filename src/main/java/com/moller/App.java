@@ -21,12 +21,14 @@ public class App extends Application {
 
         // Sets the first page to the EditorPage in the Views class.
         // By the way, don't make a Views class if you have multiple Views to make.
+        // The better way is to make each View its own class and having a Views folder.
         Scene scene = new Scene(Views.EditorPage(stage), 800, 600);
         stage.setScene(scene);
 
         stage.show();
     }
 
+    // These are here in case I suddenly start wroking with FXML.
     static void setRoot(String fxml) throws IOException {
         scene.setRoot(loadFXML(fxml));
     }

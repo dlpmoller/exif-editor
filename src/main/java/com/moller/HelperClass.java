@@ -64,6 +64,14 @@ public class HelperClass {
         return sretval;
     }
 
+    /**
+     * Saves the metadata if there's any changes to the value specified.
+     *
+     * @param contentPane The metadata from the GUI.
+     * @param imgFile     The image file to save the metadata to.
+     * @see ViewHelper#DisplayImageMetadata(FlowPane, File)
+     * @see ViewHelper#AddMetadataField(String, String)
+     */
     public static void SaveMetadataEdits(FlowPane contentPane, File imgFile) {
         // TODO: Getting the metadata can be made into it's own thing.
         TiffImageMetadata exifData = null;
@@ -123,12 +131,60 @@ public class HelperClass {
         }
     }
 
+    /**
+     * Removes field from the output set and adds the new value if applicable.
+     *
+     * @param outputDir The output set to remove and add fields to/from.
+     * @param tagList   The list of tags to compare the tag ID to.
+     * @param tag       The tag ID to save the value to.
+     * @param value     The value from the {@code TextField} input.
+     * @return Returns the provided output set with the specified field removed or
+     *         updated.
+     */
+    public static TiffOutputDirectory handleOutputField(TiffOutputDirectory outputDir, MetadataObject[] tagList,
+            int tag,
+            String value) {
+        outputDir.removeField(tag);
+        if (!value.isBlank() || !value.isEmpty()) {
+            for (MetadataObject metadataTag : tagList) {
+                if (metadataTag.getMetadataId() == tag) {
+                    if (metadataTag.getValueType() != null) {
+                        addFieldToOutput(outputDir, metadataTag.getValueType(), value);
+                    } else {
+                        System.out.print(
+                                "Write action for tag " + metadataTag.getMetadataTag() + " has not been created.");
+                    }
+                }
+            }
+        }
+        return outputDir;
+    }
+
+    /**
+     * Identifies the tag object and converts the value accordingly before adding it
+     * to the output set
+     *
+     * @param outputDir The outputset to add to
+     * @param writeTag  The tag to add
+     * @param value
+     */
+    private static void addFieldToOutput(TiffOutputDirectory outputDir, Object writeTag, String value) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'addFieldToOutput'");
+    }
+
     // TODO: Handle more metadata directories than just Jpeg ones.
-    public static JpegImageMetadata GetMetadataFromImage(File file) {
+    /**
+     * Retrieves metadata from the given image
+     *
+     * @param imgFile The Image to extract EXIF/GPS/IPTC data from
+     * @return Uhhhh
+     */
+    public static JpegImageMetadata GetMetadataFromImage(File imgFile) {
         JpegImageMetadata jimretval = null;
 
         try {
-            jimretval = (JpegImageMetadata) Imaging.getMetadata(file);
+            jimretval = (JpegImageMetadata) Imaging.getMetadata(imgFile);
         } catch (ImagingException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

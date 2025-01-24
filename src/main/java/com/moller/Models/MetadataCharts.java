@@ -11,19 +11,20 @@ import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoShort;
 public class MetadataCharts {
     public static MetadataObject[] GetExifDirectory() {
         return new MetadataObject[] {
-                new MetadataObject(0x0001, "InteropIndex", null),
-                new MetadataObject(0x0002, "InteropVersion", null),
-                new MetadataObject(0x000b, "ProcessingSoftware", null),
-                new MetadataObject(0x00fe, "NewSubfileType", TiffTagConstants.TIFF_TAG_NEW_SUBFILE_TYPE),
                 // TODO: How do I add this? List for dropdown?
-                new MetadataObject(0x00ff, "OldSubfileType", null),
-                new MetadataObject(0x0100, "ImageWidth", TiffTagConstants.TIFF_TAG_IMAGE_WIDTH),
-                new MetadataObject(0x0101, "ImageHeight", TiffTagConstants.TIFF_TAG_IMAGE_LENGTH),
-                new MetadataObject(0x0102, "BitsPerSample", TiffTagConstants.TIFF_TAG_BITS_PER_SAMPLE),
+                new MetadataObject(0x0001, "InteropIndex", "String", 3),
+                new MetadataObject(0x0002, "InteropVersion", "Undefined", 0),
+                new MetadataObject(0x000b, "ProcessingSoftware", "String", 0),
+                new MetadataObject(0x00fe, "NewSubfileType", "Long", 0),
                 // TODO: How do I add this? List for dropdown?
-                new MetadataObject(0x0103, "Compression", null),
+                new MetadataObject(0x00ff, "OldSubfileType", "Short", 1),
+                new MetadataObject(0x0100, "ImageWidth", "ShortOrLong", 0),
+                new MetadataObject(0x0101, "ImageHeight", "ShortOrLong", 0),
+                new MetadataObject(0x0102, "BitsPerSample", "Shorts", 0),
                 // TODO: How do I add this? List for dropdown?
-                new MetadataObject(0x0106, "PhotometicInterpretation", null),
+                new MetadataObject(0x0103, "Compression", "Short", 0),
+                // TODO: How do I add this? List for dropdown?
+                new MetadataObject(0x0106, "PhotometicInterpretation", "Short", 5),
                 // TODO: How do I add this? List for dropdown?
                 new MetadataObject(0x0107, "Thresholding", null),
                 new MetadataObject(0x0108, "CellWidth", TiffTagConstants.TIFF_TAG_CELL_WIDTH),
@@ -383,32 +384,37 @@ public class MetadataCharts {
      *                  Node.
      * @return Returns the value of the tag constant provided, if it's not null.
      */
-    public Object convertTextValue(MetadataObject tag, String textField) {
-        Object tagClass = tag.writeTag();
+    public static Object convertTextValue(MetadataObject tag, String textField) {
+        Object tagClass = tag.getValueType();
 
-        try {
-            if (tagClass.getClass() == TagInfoShort.class) {
-                return Short.valueOf(textField);
+        if (tagClass == null) {
+            return null;
+        } else {
+            try {
+                if (tagClass.getClass() == TagInfoShort.class) {
+                    return Short.valueOf(textField);
+                }
+
+                if (tagClass.getClass() == TagInfoLong.class) {
+                    return Long.valueOf(textField);
+                }
+
+                if (tagClass.getClass() == TagInfoRational.class) {
+                    return null;
+                }
+
+                if (tagClass.getClass() == TagInfoRationals.class) {
+                    return null;
+                }
+
+                if (tagClass.getClass() == TagInfoAscii.class) {
+                    return textField;
+                }
+            } catch (NumberFormatException numFormEx) {
+                // TODO: handle exception
             }
-
-            if (tagClass.getClass() == TagInfoLong.class) {
-                return Long.valueOf(textField);
-            }
-
-            if (tagClass.getClass() == TagInfoRational.class) {
-
-            }
-
-            if (tagClass.getClass() == TagInfoRationals.class) {
-
-            }
-
-            if (tagClass.getClass() == TagInfoAscii.class) {
-                return textField;
-            }
-        } catch (NumberFormatException numFormEx) {
-            // TODO: handle exception
         }
+
         return null;
     }
 }

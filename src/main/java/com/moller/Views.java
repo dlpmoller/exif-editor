@@ -31,7 +31,7 @@ public class Views {
         ColumnConstraints col1 = new ColumnConstraints();
         col1.setHgrow(Priority.SOMETIMES);
         ColumnConstraints col2 = new ColumnConstraints();
-        col2.setHgrow(Priority.ALWAYS);
+        col2.setHgrow(Priority.SOMETIMES);
         ColumnConstraints col3 = new ColumnConstraints();
         col3.setHgrow(Priority.ALWAYS);
         ColumnConstraints col4 = new ColumnConstraints();
@@ -40,7 +40,7 @@ public class Views {
         gpretval.setHgap(5);
         gpretval.setVgap(5);
         gpretval.setPadding(new Insets(10));
-        gpretval.setGridLinesVisible(true);
+        gpretval.setGridLinesVisible(false);
 
         /// Add:
         /// First argument is Column placement
@@ -50,6 +50,7 @@ public class Views {
         ScrollPane metadataDisplay = new ScrollPane();
 
         FlowPane contentPane = new FlowPane();
+        contentPane.setMaxWidth(metadataDisplay.getMaxWidth());
         metadataDisplay.setContent(contentPane);
         metadataDisplay.setMinHeight(400);
         gpretval.add(metadataDisplay, 0, 1, 3, 1);

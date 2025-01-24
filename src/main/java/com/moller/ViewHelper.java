@@ -8,6 +8,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
+import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
@@ -62,8 +63,11 @@ public class ViewHelper {
     public static GridPane AddMetadataField(String tagName, String value) {
         GridPane gpretval = new GridPane();
         gpretval.setPadding(new Insets(10, 10, 10, 10));
+        ColumnConstraints col0 = new ColumnConstraints();
+        col0.setHgrow(Priority.ALWAYS);
+        gpretval.getColumnConstraints().add(col0);
         Label fieldName = new Label();
-        fieldName.setTooltip(new Tooltip());
+        fieldName.setTooltip(new Tooltip(tagName));
         if (tagName.contains("Unknown Tag")) {
             fieldName.setText(HelperClass.IdentifyEXIFTag(tagName));
         } else {
@@ -77,11 +81,12 @@ public class ViewHelper {
     }
 
     /**
-     * Removes tag fields from view if they are not within the specified search
-     * scope
+     * Removes tag fields from the user's view if they are not within the specified
+     * search scope
      *
      * @param contentPane The tags to iterate through
      * @param searchTerm  The search scope to filter for
+     * @see ViewHelper#AddMetadataField(String, String)
      */
     public static void FilterShownTags(FlowPane contentPane, String searchTerm) {
         if (!searchTerm.isEmpty() || !searchTerm.isBlank()) {
@@ -91,15 +96,20 @@ public class ViewHelper {
                     Label tag = (Label) tagField.getChildren().get(0);
                     if (!tag.getText().toLowerCase().contains(searchTerm.toLowerCase())) {
                         dataField.setDisable(true);
-                        tagField.getColumnConstraints().get(0).setHgrow(Priority.NEVER);
+                        // tagField.setVisible(false);
+                        // tagField.setMaxWidth(0);
                     } else {
                         dataField.setDisable(false);
+                        // tagField.setVisible(true);
                     }
                 }
             }
         } else {
             for (Node dataField : contentPane.getChildren()) {
-                dataField.setDisable(false);
+                GridPane tagField = (GridPane) dataField;
+                tagField.setVisible(true);
+                tagField.setMaxWidth(50);
+
             }
         }
     }
