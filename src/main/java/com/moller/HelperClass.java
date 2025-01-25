@@ -143,10 +143,12 @@ public class HelperClass {
      * @return Returns the provided output set with the specified field removed or
      *         updated.
      */
-    public static TiffOutputDirectory handleOutputField(TiffOutputDirectory outputDir, MetadataObject[] tagList,
+    public static Boolean handleOutputField(TiffOutputDirectory outputDir, MetadataObject[] tagList,
             int tag,
             String value) {
+        Boolean bretval = false;
         outputDir.removeField(tag);
+        bretval = true;
         if (!value.isBlank() || !value.isEmpty()) {
             for (MetadataObject metadataTag : tagList) {
                 if (metadataTag.getMetadataId() == tag) {
@@ -159,18 +161,18 @@ public class HelperClass {
                 }
             }
         }
-        return outputDir;
+        return bretval;
     }
 
     /**
-     * Identifies the tag object and converts the value accordingly before adding it
-     * to the output set
      *
-     * @param outputDir The outputset to add to
-     * @param tag       The tag to add
+     * @param outputDir
+     * @param tag
      * @param value
+     * @return
      */
-    private static void addFieldToOutput(TiffOutputDirectory outputDir, MetadataObject tag, String value) {
+    private static Boolean addFieldToOutput(TiffOutputDirectory outputDir, MetadataObject tag, String value) {
+        Boolean bretval = false;
         try {
             switch (tag.getValueType()) {
                 case "String":
@@ -178,6 +180,7 @@ public class HelperClass {
                             new TagInfoAscii(
                                     tag.getMetadataTag(), tag.getMetadataId(), tag.getValueLength(),
                                     TiffDirectoryType.TIFF_DIRECTORY_ROOT));
+                    bretval = true;
                     break;
 
                 default:
@@ -187,6 +190,7 @@ public class HelperClass {
             // TODO: handle exception
             System.err.println(imgEx);
         }
+        return bretval;
     }
 
     // TODO: Handle more metadata directories than just Jpeg ones.
