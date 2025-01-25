@@ -14,6 +14,8 @@ import org.apache.commons.imaging.formats.jpeg.iptc.PhotoshopApp13Data;
 import org.apache.commons.imaging.formats.tiff.TiffField;
 import org.apache.commons.imaging.formats.tiff.TiffImageMetadata;
 import org.apache.commons.imaging.formats.tiff.TiffImageMetadata.GpsInfo;
+import org.apache.commons.imaging.formats.tiff.constants.TiffDirectoryType;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoAscii;
 import org.apache.commons.imaging.formats.tiff.write.TiffOutputDirectory;
 import org.apache.commons.imaging.formats.tiff.write.TiffOutputSet;
 
@@ -149,7 +151,7 @@ public class HelperClass {
             for (MetadataObject metadataTag : tagList) {
                 if (metadataTag.getMetadataId() == tag) {
                     if (metadataTag.getValueType() != null) {
-                        addFieldToOutput(outputDir, metadataTag.getValueType(), value);
+                        addFieldToOutput(outputDir, metadataTag, value);
                     } else {
                         System.out.print(
                                 "Write action for tag " + metadataTag.getMetadataTag() + " has not been created.");
@@ -165,12 +167,26 @@ public class HelperClass {
      * to the output set
      *
      * @param outputDir The outputset to add to
-     * @param writeTag  The tag to add
+     * @param tag       The tag to add
      * @param value
      */
-    private static void addFieldToOutput(TiffOutputDirectory outputDir, Object writeTag, String value) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'addFieldToOutput'");
+    private static void addFieldToOutput(TiffOutputDirectory outputDir, MetadataObject tag, String value) {
+        try {
+            switch (tag.getValueType()) {
+                case "String":
+                    outputDir.add(
+                            new TagInfoAscii(
+                                    tag.getMetadataTag(), tag.getMetadataId(), tag.getValueLength(),
+                                    TiffDirectoryType.TIFF_DIRECTORY_ROOT));
+                    break;
+
+                default:
+                    break;
+            }
+        } catch (ImagingException imgEx) {
+            // TODO: handle exception
+            System.err.println(imgEx);
+        }
     }
 
     // TODO: Handle more metadata directories than just Jpeg ones.
