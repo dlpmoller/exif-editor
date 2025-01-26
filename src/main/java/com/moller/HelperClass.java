@@ -11,10 +11,14 @@ import org.apache.commons.imaging.formats.jpeg.JpegImageMetadata;
 import org.apache.commons.imaging.formats.jpeg.JpegPhotoshopMetadata;
 import org.apache.commons.imaging.formats.jpeg.iptc.IptcRecord;
 import org.apache.commons.imaging.formats.jpeg.iptc.PhotoshopApp13Data;
+import org.apache.commons.imaging.formats.tiff.TiffDirectory;
 import org.apache.commons.imaging.formats.tiff.TiffField;
 import org.apache.commons.imaging.formats.tiff.TiffImageMetadata;
 import org.apache.commons.imaging.formats.tiff.TiffImageMetadata.GpsInfo;
+import org.apache.commons.imaging.formats.tiff.constants.TiffDirectoryConstants;
 import org.apache.commons.imaging.formats.tiff.constants.TiffDirectoryType;
+import org.apache.commons.imaging.formats.tiff.fieldtypes.AbstractFieldType;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfo;
 import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoAscii;
 import org.apache.commons.imaging.formats.tiff.write.TiffOutputDirectory;
 import org.apache.commons.imaging.formats.tiff.write.TiffOutputSet;
@@ -216,8 +220,17 @@ public class HelperClass {
         return jimretval;
     }
 
-    public static HashMap<String, HashMap<String, String>> GetDirectories(
+    /**
+     * This method extracts the directories from the image provided, adding them to
+     * a hashmap of hashmaps.
+     *
+     * @param metadataDirectories
+     * @param imgFile
+     * @return
+     */
+    public static Boolean GetDirectories(
             HashMap<String, HashMap<String, String>> metadataDirectories, File imgFile) {
+        Boolean bretval = false;
 
         String fileType = imgFile.getAbsolutePath().split("\\.")[1].toLowerCase();
 
@@ -232,20 +245,15 @@ public class HelperClass {
                     JpegPhotoshopMetadata iptcMetadata = jpgMetaData.getPhotoshop();
                     if (exifMetadata != null) {
 
-                        HashMap<String, String> exifDirectory = new HashMap<>();
+                        HashMap<Integer, String> exifDirectory = new HashMap<>();
                         MetadataObject[] listofobjects = MetadataCharts.GetExifDirectory();
 
-                        for (MetadataObject metadataObject : listofobjects) {
-                            System.out.println(metadataObject.getMetadataId());
-                        }
                         for (TiffField exifField : exifMetadata.getAllFields()) {
                             // System.out.println(exifField.getTag());
                             if (exifField.getTagName().contains("GPSInfo")) {
-                                HashMap<String, String> gpsHashMap = GetGPSInfo(exifMetadata);
 
-                                if (gpsHashMap.size() > 0) {
-                                    metadataDirectories.put("GPS Info", gpsHashMap);
-                                }
+                                HashMap<Integer, String> gpsHashMap = new HashMap<>();
+                                Boolean generatedGPSDirectory = getGPSInfo(exifMetadata, gpsHashMap);
 
                             } else {
                                 exifDirectory.put(exifField.getTagName(), exifField.getValueDescription());
@@ -265,7 +273,7 @@ public class HelperClass {
             default:
                 break;
         }
-        return metadataDirectories;
+        return bretval;
     }
 
     private static HashMap<String, String> GetIPTCInfo(JpegPhotoshopMetadata photoshop) {
@@ -283,22 +291,24 @@ public class HelperClass {
         return hmretval;
     }
 
-    private static HashMap<String, String> GetGPSInfo(TiffImageMetadata exifMetadata) {
-        HashMap<String, String> hmretval = new HashMap<>();
+    /**
+     * Extracts the GPS directory from the metadata.
+     *
+     * @param exifMetadata
+     * @return
+     */
+    private static Boolean getGPSInfo(TiffImageMetadata exifMetadata, HashMap<Integer, String> directoryMap) {
+        Boolean bretval = false;
+        MetadataObject[] gpsTags = MetadataCharts.GetGPSDirectory();
+        TiffDirectory gpsDir = exifMetadata.findDirectory(TiffDirectoryConstants.DIRECTORY_TYPE_GPS);
 
         try {
             // Pull GPSInfo. May be null.
             GpsInfo gpsData = exifMetadata.getGpsInfo();
-            if (gpsData != null) {
 
-                hmretval.put("LatitudeRef", gpsData.latitudeRef);
-                hmretval.put("LongitudeRef", gpsData.longitudeRef);
-                hmretval.put("LatitudeNorth", Double.toString(gpsData.getLatitudeAsDegreesNorth()));
-                hmretval.put("LatitudeMinutes", gpsData.latitudeMinutes.toDisplayString());
-                hmretval.put("LatitudeSeconds", gpsData.latitudeSeconds.toDisplayString());
-                hmretval.put("LongitudeEast", Double.toString(gpsData.getLongitudeAsDegreesEast()));
-                hmretval.put("LongitudeMinutes", gpsData.longitudeMinutes.toDisplayString());
-                hmretval.put("LongitudeSeconds", gpsData.longitudeSeconds.toDisplayString());
+            for (MetadataObject tag : gpsTags) {
+                final TiffField gpsField = gpsDir.findField(createField(tag, "GPS"));
+
             }
 
         } catch (ImagingException e) {
@@ -306,7 +316,47 @@ public class HelperClass {
             e.printStackTrace();
         }
 
-        return hmretval;
+        return bretval;
     }
+
+    // #region TiffField creation
+    private static TagInfo createField(MetadataObject tag, String directory) {
+        switch (directory) {
+            case "GPS":
+                return createGPSField(tag);
+            case "Root":
+            case "IPTC":
+            default:
+                return null;
+        }
+    }
+
+    private static TagInfo createGPSField(MetadataObject tag) {
+        AbstractFieldType fieldType = AbstractFieldType.UNDEFINED;
+        int length = tag.getValueLength();
+        if (length == 0) {
+            length = -1;
+        }
+
+        switch (tag.getValueType()) {
+            case "String":
+                fieldType = AbstractFieldType.ASCII;
+                break;
+            case "Short":
+                fieldType = AbstractFieldType.SHORT;
+                break;
+            case "Rationals":
+            case "Rational":
+                fieldType = AbstractFieldType.RATIONAL;
+                break;
+            case "Long":
+                fieldType = AbstractFieldType.LONG;
+                break;
+        }
+
+        return new TagInfo(tag.getMetadataTag(), tag.getMetadataId(), fieldType, length,
+                TiffDirectoryType.EXIF_DIRECTORY_GPS);
+    }
+    // #endregion
 
 }

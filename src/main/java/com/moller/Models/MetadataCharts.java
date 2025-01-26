@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 public class MetadataCharts {
 
+    // #region Directories
     public static MetadataObject[] GetExifDirectory() {
         // TODO: Fix these entries.
         /*
@@ -335,66 +336,104 @@ public class MetadataCharts {
         return null;
     }
 
-    public MetadataObject[] GetGPSDirectory() {
+    public static MetadataObject[] GetGPSDirectory() {
         return new MetadataObject[] {
                 new MetadataObject(0x0000, "GPSVersionID", "Bytes", 0),
-                // TODO: How do I add this? List for dropdown?
-                new MetadataObject(0x0001, "GPSLatitudeRef", "String", 1),
-                new MetadataObject(0x0002, "GPSLatitude", "Rationals", 0),
-                // TODO: How do I add this? List for dropdown?
-                new MetadataObject(0x0003, "GPSLongitudeRef", "String", 1),
-                new MetadataObject(0x0004, "GPSLongitude", "Rationals", 0),
-                // TODO: How do I add this? List for dropdown?
-                new MetadataObject(0x0005, "GPSAltitudeRef", "String", 1),
+                new MetadataObject(0x0001, "GPSLatitudeRef", "String", 2),
+                new MetadataObject(0x0002, "GPSLatitude", "Rationals", 3),
+                new MetadataObject(0x0003, "GPSLongitudeRef", "String", 2),
+                new MetadataObject(0x0004, "GPSLongitude", "Rationals", 3),
+                new MetadataObject(0x0005, "GPSAltitudeRef", "Byte", 0),
                 new MetadataObject(0x0006, "GPSAltitude", "Rational", 0),
-                new MetadataObject(0x0007, "GPSTimeStamp", "Rational", 0),
+                new MetadataObject(0x0007, "GPSTimeStamp", "Rationals", 3),
                 new MetadataObject(0x0008, "GPSSatellites", "String", 0),
-                // TODO: How do I add this? List for dropdown?
-                new MetadataObject(0x0009, "GPSStatus", "String", 1),
-                // TODO: How do I add this? List for dropdown?
-                new MetadataObject(0x000a, "GPSMeasureMode", "String", 1),
-                new MetadataObject(0x000b, "GPSDOP", "Rational", 0),
-                // TODO: How do I add this? List for dropdown?
-                new MetadataObject(0x000c, "GPSSpeedRef", "String", 1),
-                new MetadataObject(0x000d, "GPSSpeed", "Rational", 0),
-                // TODO: How do I add this? List for dropdown?
-                new MetadataObject(0x000e, "GPSTrackRef", "String", 1),
-                new MetadataObject(0x000f, "GPSTrack", "Rational", 0),
-                // TODO: How do I add this? List for dropdown?
-                new MetadataObject(0x0010, "GPSImgDirectionRef", "String", 0),
-                new MetadataObject(0x0011, "GPSImgDirection", "Rational", 0),
+                new MetadataObject(0x0009, "GPSStatus", "String", 2),
+                new MetadataObject(0x000a, "GPSMeasureMode", "String", 2),
+                new MetadataObject(0x000b, "GPSDOP", "Rational", 1),
+                new MetadataObject(0x000c, "GPSSpeedRef", "String", 2),
+                new MetadataObject(0x000d, "GPSSpeed", "Rational", 1),
+                new MetadataObject(0x000e, "GPSTrackRef", "String", 2),
+                new MetadataObject(0x000f, "GPSTrack", "Rational", 1),
+                new MetadataObject(0x0010, "GPSImgDirectionRef", "String", 2),
+                new MetadataObject(0x0011, "GPSImgDirection", "Rational", 1),
                 new MetadataObject(0x0012, "GPSMapDatum", "String", 0),
-                // TODO: How do I add this? List for dropdown?
-                new MetadataObject(0x0013, "GPSDestLatitudeRef", "String", 1),
-                new MetadataObject(0x0014, "GPSDestLatitude", "Rational", 0),
-                // TODO: How do I add this? List for dropdown?
-                new MetadataObject(0x0015, "GPSDestLongitudeRef", "String", 1),
-                new MetadataObject(0x0016, "GPSDestLongitude", "Rational", 0),
-                // TODO: How do I add this? List for dropdown?
-                new MetadataObject(0x0017, "GPSDestBearingRef", "String", 1),
-                new MetadataObject(0x0018, "GPSDestBearing", "Rational", 0),
-                // TODO: How do I add this? List for dropdown?
-                new MetadataObject(0x0019, "GPSDestDistanceRef", "String", 1),
-                new MetadataObject(0x001a, "GPSDestDistance", "Rational", 0),
-                // TODO: How do I add this? List for dropdown?
-                new MetadataObject(0x001b, "GPSProcessingMethod", "String", 0),
-                new MetadataObject(0x001c, "GPSAreaInformation", "String", 0),
+                new MetadataObject(0x0013, "GPSDestLatitudeRef", "String", 2),
+                new MetadataObject(0x0014, "GPSDestLatitude", "Rationals", 3),
+                new MetadataObject(0x0015, "GPSDestLongitudeRef", "String", 2),
+                new MetadataObject(0x0016, "GPSDestLongitude", "Rationals", 3),
+                new MetadataObject(0x0017, "GPSDestBearingRef", "String", 2),
+                new MetadataObject(0x0018, "GPSDestBearing", "Rational", 1),
+                new MetadataObject(0x0019, "GPSDestDistanceRef", "String", 2),
+                new MetadataObject(0x001a, "GPSDestDistance", "Rational", 1),
+                new MetadataObject(0x001b, "GPSProcessingMethod", "Undef", 0),
+                new MetadataObject(0x001c, "GPSAreaInformation", "Undef", 0),
                 new MetadataObject(0x001d, "GPSDateStamp", "String", 11),
-                // TODO: How do I add this? List for dropdown?
                 new MetadataObject(0x001e, "GPSDifferential", "Short", 1),
-                new MetadataObject(0x001f, "GPSHPositioningError", "Rational", 0)
+                new MetadataObject(0x001f, "GPSHPositioningError", "Rational", 1)
         };
     }
 
     public MetadataObject[] GetIPTCDirectory() {
         return new MetadataObject[] { new MetadataObject(1, "metadataTag", "Type", 0) };
     }
+    // #endregion
 
-    public HashMap<String, String> GPSLatitudeRef_List() {
+    // #region Selection options by Directory
+    public HashMap<String, String> GPSOptionSelectionMap(Integer tag) {
         HashMap<String, String> hsretval = new HashMap<>();
-        hsretval.put("N", "North");
-        hsretval.put("S", "South");
 
+        switch (tag) {
+            case 0x0001:
+                hsretval.put("N", "North");
+                hsretval.put("S", "South");
+                break;
+            case 0x0003:
+                hsretval.put("E", "East");
+                hsretval.put("W", "West");
+            case 0x0005:
+                hsretval.put("0", "Above Sea Level");
+                hsretval.put("1", "Below Sea Level");
+            case 0x0009:
+                hsretval.put("A", "Measurement Active");
+                hsretval.put("V", "Measurement Void");
+            case 0x000a:
+                hsretval.put("2", "2-Dimensional Measurement");
+                hsretval.put("3", "3-Dimensional Measurement");
+            case 0x000c:
+                hsretval.put("K", "Kilometres Per Hour (km/h)");
+                hsretval.put("M", "Miles Per Hour (mph)");
+                hsretval.put("N", "Knots");
+            case 0x000e:
+                hsretval.put("M", "Magnetic North");
+                hsretval.put("T", "True North");
+            case 0x0010:
+                hsretval.put("M", "Magnetic North");
+                hsretval.put("T", "True North");
+            case 0x0013:
+                hsretval.put("N", "North");
+                hsretval.put("S", "South");
+            case 0x0015:
+                hsretval.put("E", "East");
+                hsretval.put("W", "West");
+            case 0x0017:
+                hsretval.put("M", "Magnetic North");
+                hsretval.put("T", "True North");
+            case 0x0019:
+                hsretval.put("K", "Kilometres Per Hour (km/h)");
+                hsretval.put("M", "Miles Per Hour (mph)");
+                hsretval.put("N", "Knots");
+            case 0x001b:
+                hsretval.put("GPS", "GPS");
+                hsretval.put("CELLID", "CELLID");
+                hsretval.put("WLAN", "WLAN");
+                hsretval.put("MANUAL", "MANUAL");
+            case 0x001e:
+                hsretval.put("0", "No Correction");
+                hsretval.put("1", "Differential Corrected");
+            default:
+                break;
+        }
+        // #endregion
         return hsretval;
     }
 }

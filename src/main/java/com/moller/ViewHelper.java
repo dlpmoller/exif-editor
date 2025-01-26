@@ -25,7 +25,7 @@ public class ViewHelper {
     public static FlowPane DisplayImageMetadata(FlowPane contentPane, File imgFile) {
         HashMap<String, HashMap<String, String>> metadataDirectories = new HashMap<>();
 
-        metadataDirectories = HelperClass.GetDirectories(metadataDirectories, imgFile);
+        Boolean bretval = HelperClass.GetDirectories(metadataDirectories, imgFile);
 
         if (metadataDirectories.isEmpty()) {
             Label emptyMetadata = new Label("This image does not contain any metadata.");
