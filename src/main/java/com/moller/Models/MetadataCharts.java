@@ -1,5 +1,7 @@
 package com.moller.Models;
 
+import java.util.HashMap;
+
 public class MetadataCharts {
 
     public static MetadataObject[] GetExifDirectory() {
@@ -386,5 +388,13 @@ public class MetadataCharts {
 
     public MetadataObject[] GetIPTCDirectory() {
         return new MetadataObject[] { new MetadataObject(1, "metadataTag", "Type", 0) };
+    }
+
+    public HashMap<String, String> GPSLatitudeRef_List() {
+        HashMap<String, String> hsretval = new HashMap<>();
+        hsretval.put("N", "North");
+        hsretval.put("S", "South");
+
+        return hsretval;
     }
 }
