@@ -24,7 +24,6 @@ public class ViewHelper {
      */
     public static FlowPane DisplayImageMetadata(FlowPane contentPane, File imgFile) {
         HashMap<String, HashMap<Integer, String>> metadataDirectories = new HashMap<>();
-
         Boolean bretval = HelperClass.GetDirectories(metadataDirectories, imgFile);
 
         // Nested for loops due to nested hashmaps. Bad idea?
@@ -37,7 +36,9 @@ public class ViewHelper {
             for (var metadataEntry : directory.getValue().entrySet()) {
                 contentPane.getChildren().add(
                         ViewHelper.AddMetadataField(
-                                metadataEntry.getKey(), metadataEntry.getValue()));
+                                metadataEntry.getKey(),
+                                metadataEntry.getValue(),
+                                directory.getKey()));
             }
         }
         return contentPane;
@@ -47,24 +48,22 @@ public class ViewHelper {
      * Adds a single metadata tag in a {@code GridPane} element. Contains a
      * {@code Label} element and a {@code TextField} element.
      *
-     * @param tagName The name of the metadata tag.
-     * @param value   The associated value of the metadata tag, if any.
+     * @param tagName   The name of the metadata tag.
+     * @param value     The associated value of the metadata tag, if any.
+     * @param directory The directory the tag is from.
      * @return Returns a {@code GridPane} element for the {@code FlowPane} element.
      * @see ViewHelper#DisplayImageMetadata(FlowPane, File)
      */
-    public static GridPane AddMetadataField(Integer tag, String value) {
+    public static GridPane AddMetadataField(Integer tag, String value, String directory) {
         GridPane gpretval = new GridPane();
         gpretval.setPadding(new Insets(10, 10, 10, 10));
         ColumnConstraints col0 = new ColumnConstraints();
         col0.setHgrow(Priority.ALWAYS);
         gpretval.getColumnConstraints().add(col0);
         Label fieldName = new Label();
-        fieldName.setTooltip(new Tooltip(tagName));
-        if (tagName.contains("Unknown Tag")) {
-            fieldName.setText(HelperClass.IdentifyEXIFTag(tagName));
-        } else {
-            fieldName.setText(tagName);
-        }
+        fieldName.setTooltip(new Tooltip(tag.toString()));
+        // Pulling on the tagset to find the name for the hex ID.
+        fieldName.setText(HelperClass.IdentifyEXIFTag(tag, directory));
         gpretval.add(fieldName, 0, 0);
         TextField valueField = new TextField();
         valueField.setText(value);
@@ -74,7 +73,7 @@ public class ViewHelper {
 
     /**
      * Removes tag fields from the user's view if they are not within the specified
-     * search scope
+     * search scope. Or they should be.
      *
      * @param contentPane The tags to iterate through
      * @param searchTerm  The search scope to filter for
@@ -99,9 +98,7 @@ public class ViewHelper {
         } else {
             for (Node dataField : contentPane.getChildren()) {
                 GridPane tagField = (GridPane) dataField;
-                tagField.setVisible(true);
-                tagField.setMaxWidth(50);
-
+                tagField.setDisable(false);
             }
         }
     }

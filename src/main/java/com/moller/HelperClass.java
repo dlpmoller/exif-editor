@@ -33,38 +33,37 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 
 public class HelperClass {
-    // This will require maintenance I suppose
-    // Speaking of:
-    // TAGS TO IMPLEMENT:
-    // (0xa003)
-    // (0xa002)
-    public static String IdentifyEXIFTag(String tagName) {
-        String sretval = "";
-        String hexValue = tagName.split("Tag ")[1];
 
-        // Source: https://exiftool.org/TagNames/EXIF.html
-        switch (hexValue) {
-            case "(0x8830)":
-                sretval = "SensitivityType";
+    /**
+     *
+     * @param tag
+     * @param directory
+     * @return
+     * @see HelperClass#GetDirectories(HashMap, File)
+     * @see MetadataCharts
+     */
+    public static String IdentifyEXIFTag(Integer tag, String directory) {
+        String sretval = "Unknown Tag (" + tag.toString() + ")";
+        MetadataObject[] tagSet = null;
+
+        switch (directory) {
+            case "Exif Data":
+                tagSet = MetadataCharts.GetExifDirectory();
                 break;
-            case "(0x8832)":
-                sretval = "RecommendedExposureIndex";
-                break;
-            case "(0x9010)":
-                sretval = "OffsetTime";
-                break;
-            case "(0x9011)":
-                sretval = "OffsetTimeOriginal";
-                break;
-            case "(0x9012)":
-                sretval = "OffsetTimeDigitized";
-                break;
-            case "(0xa460)":
-                sretval = "CompositeImage";
+            case "GPS Data":
+                tagSet = MetadataCharts.GetGPSDirectory();
                 break;
             default:
-                sretval = tagName;
                 break;
+        }
+
+        if (tagSet != null) {
+            for (MetadataObject metadataObject : tagSet) {
+                if (tag == metadataObject.getMetadataId()) {
+                    sretval = metadataObject.getMetadataTag();
+                    break;
+                }
+            }
         }
 
         return sretval;
@@ -252,6 +251,7 @@ public class HelperClass {
                     Boolean generatedRootDirectory = getExifInfo(exifMetadata, exifDirectory);
 
                     metadataDirectories.put("EXIF Data", exifDirectory);
+                    metadataDirectories.put("GPS Data", gpsHashMap);
                 }
 
                 // if (iptcMetadata != null) {
