@@ -224,8 +224,9 @@ public class HelperClass {
      * This method extracts the directories from the image provided, adding them to
      * a hashmap of hashmaps.
      *
-     * @param metadataDirectories
-     * @param imgFile
+     * @param metadataDirectories Hashmap of hashmaps of directories, consisting of
+     *                            the tag ID and the value it contains.
+     * @param imgFile             The image to pull the metadata directories from.
      * @return
      */
     public static Boolean GetDirectories(
@@ -283,25 +284,45 @@ public class HelperClass {
     }
 
     /**
+     * Extracts the EXIF data from the image metadata provided.
      *
-     * @param exifMetadata
-     * @param exifDirectory
-     * @return
+     * @param exifMetadata  The image metadata to read from.
+     * @param exifDirectory The hashmap to add extracted data into.
+     * @return Whether the data pull completed successfully or not.
      */
     private static Boolean getExifInfo(TiffImageMetadata exifMetadata, HashMap<Integer, String> exifDirectory) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getExifInfo'");
+        Boolean bretval = false;
+        MetadataObject[] exifTags = MetadataCharts.GetExifDirectory();
+
+        try {
+            for (MetadataObject tag : exifTags) {
+                String metadataValue = "";
+                TiffField exifField = exifMetadata.findField(createField(tag, "Root"));
+
+                if (exifField != null) {
+                    metadataValue = exifField.getValue().toString();
+                }
+
+                exifDirectory.put(tag.getMetadataId(), metadataValue);
+            }
+
+        } catch (ImagingException imgEx) {
+            imgEx.printStackTrace();
+            bretval = false;
+        }
+
+        return bretval;
     }
 
     /**
+     * Extracts the GPS directory metadata from the EXIF data.
      *
-     * @param exifMetadata
-     * @param directoryMap
-     * @return
+     * @param exifMetadata the image metadata to read data from.
+     * @param directoryMap The hashmap to insert data into.
+     * @return Whether the data pull completed successfully or not.
      */
     private static Boolean getGPSInfo(TiffImageMetadata exifMetadata, HashMap<Integer, String> directoryMap) {
         Boolean bretval = false;
-        String metadataValue = "";
         MetadataObject[] gpsTags = MetadataCharts.GetGPSDirectory();
         TiffDirectory gpsDir = exifMetadata.findDirectory(TiffDirectoryConstants.DIRECTORY_TYPE_GPS);
 
@@ -310,8 +331,9 @@ public class HelperClass {
             GpsInfo gpsData = exifMetadata.getGpsInfo();
 
             for (MetadataObject tag : gpsTags) {
-                // if Latitude or Longitude crops up, just make the Imaging library do it.
-                // Latitude
+                String metadataValue = "";
+                // if Latitude(0x0002) or Longitude(0x0004) crops up, just make the Imaging
+                // library do it.
                 if (tag.getMetadataId() == 0x0002) {
                     if (gpsData != null) {
                         metadataValue = Double.toString(gpsData.getLatitudeAsDegreesNorth());
@@ -330,9 +352,10 @@ public class HelperClass {
                 directoryMap.put(tag.getMetadataId(), metadataValue);
             }
 
-        } catch (ImagingException e) {
+        } catch (ImagingException imgEx) {
             // TODO Auto-generated catch block
-            e.printStackTrace();
+            imgEx.printStackTrace();
+            bretval = false;
         }
 
         return bretval;
