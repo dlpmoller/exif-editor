@@ -1,6 +1,6 @@
 package com.moller.Models;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 
 public class MetadataCharts {
 
@@ -31,8 +31,8 @@ public class MetadataCharts {
                 new MetadataObject(0x010a, "FillOrder", "Short", 1),
                 new MetadataObject(0x010d, "DocumentName", "String", 0),
                 new MetadataObject(0x010e, "ImageDescription", "String", 0),
-                new MetadataObject(0x010f, "Make", "String", 0), new MetadataObject(0x0110,
-                        "Model", "String", 0),
+                new MetadataObject(0x010f, "Make", "String", 0),
+                new MetadataObject(0x0110, "Model", "String", 0),
                 new MetadataObject(0x0111, "StripOffsets", "ShortOrLong", 0),
                 // TODO: How do I add this? List for dropdown?
                 new MetadataObject(0x0112, "Orientation", "Short", 1),
@@ -54,14 +54,16 @@ public class MetadataCharts {
                 // TODO: How do I add this? List for dropdown?
                 new MetadataObject(0x0122, "GrayResponseUnit", "Short", 1),
                 new MetadataObject(0x0123, "GrayResponseCurve", "Shorts", 0),
-                new MetadataObject(0x0124, "T4Options", "Long", 0), new MetadataObject(0x0125, "T6Options", "Long", 0),
+                new MetadataObject(0x0124, "T4Options", "Long", 0),
+                new MetadataObject(0x0125, "T6Options", "Long", 0),
                 // TODO: How do I add this? List for dropdown?
                 new MetadataObject(0x0128, "ResolutionUnit", "Short", 1),
                 new MetadataObject(0x0129, "PageNumber", "Shorts", 2),
                 new MetadataObject(0x012c, "ColorResponseUnit", "String", 0),
                 new MetadataObject(0x012d, "TransferFunction", "Shorts", 0),
                 new MetadataObject(0x0131, "Software", "String", 0),
-                new MetadataObject(0x0132, "DateTime", "String", 0), new MetadataObject(0x013b, "Artist", "String", 0),
+                new MetadataObject(0x0132, "DateTime", "String", 0),
+                new MetadataObject(0x013b, "Artist", "String", 0),
                 new MetadataObject(0x013c, "HostComputer", "String", 0),
                 // TODO: How do I add this? List for dropdown?
                 new MetadataObject(0x013d, "Predictor", "Short", 5),
@@ -371,85 +373,92 @@ public class MetadataCharts {
         };
     }
 
-    public MetadataObject[] GetIPTCDirectory() {
+    public MetadataObject[] getIPTCDirectory() {
         return new MetadataObject[] { new MetadataObject(1, "metadataTag", "Type", 0) };
     }
     // #endregion
 
     // #region Selection options by Directory
-    public HashMap<String, String> GPSOptionSelectionMap(Integer tag) {
-        HashMap<String, String> hmretval = new HashMap<>();
+    public static ArrayList<ComboItem> gpsOptionSelectionMap(Integer tag) {
+        ArrayList<ComboItem> olretval = new ArrayList<ComboItem>();
 
         switch (tag) {
             case 0x0001:
-                hmretval.put("N", "North");
-                hmretval.put("S", "South");
+            case 0x0013:
+                olretval.add(new ComboItem("", "None"));
+                olretval.add(new ComboItem("N", "North"));
+                olretval.add(new ComboItem("S", "South"));
                 break;
             case 0x0003:
-                hmretval.put("E", "East");
-                hmretval.put("W", "West");
-            case 0x0005:
-                hmretval.put("0", "Above Sea Level");
-                hmretval.put("1", "Below Sea Level");
-            case 0x0009:
-                hmretval.put("A", "Measurement Active");
-                hmretval.put("V", "Measurement Void");
-            case 0x000a:
-                hmretval.put("2", "2-Dimensional Measurement");
-                hmretval.put("3", "3-Dimensional Measurement");
-            case 0x000c:
-                hmretval.put("K", "Kilometres Per Hour (km/h)");
-                hmretval.put("M", "Miles Per Hour (mph)");
-                hmretval.put("N", "Knots");
-            case 0x000e:
-                hmretval.put("M", "Magnetic North");
-                hmretval.put("T", "True North");
-            case 0x0010:
-                hmretval.put("M", "Magnetic North");
-                hmretval.put("T", "True North");
-            case 0x0013:
-                hmretval.put("N", "North");
-                hmretval.put("S", "South");
             case 0x0015:
-                hmretval.put("E", "East");
-                hmretval.put("W", "West");
-            case 0x0017:
-                hmretval.put("M", "Magnetic North");
-                hmretval.put("T", "True North");
+                olretval.add(new ComboItem("", "None"));
+                olretval.add(new ComboItem("E", "East"));
+                olretval.add(new ComboItem("W", "West"));
+                break;
+            case 0x0005:
+                olretval.add(new ComboItem("", "None"));
+                olretval.add(new ComboItem("0", "Above Sea Level"));
+                olretval.add(new ComboItem("1", "Below Sea Level"));
+                break;
+            case 0x0009:
+                olretval.add(new ComboItem("", "None"));
+                olretval.add(new ComboItem("A", "Measurement Active"));
+                olretval.add(new ComboItem("V", "Measurement Void"));
+                break;
+            case 0x000a:
+                olretval.add(new ComboItem("", "None"));
+                olretval.add(new ComboItem("2", "2-Dimensional Measurement"));
+                olretval.add(new ComboItem("3", "3-Dimensional Measurement"));
+                break;
+            case 0x000c:
             case 0x0019:
-                hmretval.put("K", "Kilometres Per Hour (km/h)");
-                hmretval.put("M", "Miles Per Hour (mph)");
-                hmretval.put("N", "Knots");
+                olretval.add(new ComboItem("", "None"));
+                olretval.add(new ComboItem("", "Kilometres Per Hour (km/h)"));
+                olretval.add(new ComboItem("", "Miles Per Hour (mph)"));
+                olretval.add(new ComboItem("", "Knots"));
+                break;
+            case 0x000e:
+            case 0x0010:
+            case 0x0017:
+                olretval.add(new ComboItem("", "None"));
+                olretval.add(new ComboItem("M", "Magnetic North"));
+                olretval.add(new ComboItem("T", "True North"));
+                break;
             case 0x001b:
-                hmretval.put("GPS", "GPS");
-                hmretval.put("CELLID", "CELLID");
-                hmretval.put("WLAN", "WLAN");
-                hmretval.put("MANUAL", "MANUAL");
+                olretval.add(new ComboItem("", "None"));
+                olretval.add(new ComboItem("GPS", "GPS"));
+                olretval.add(new ComboItem("CELLID", "CELLID"));
+                olretval.add(new ComboItem("WLAN", "WLAN"));
+                olretval.add(new ComboItem("MANUAL", "MANUAL"));
+                break;
             case 0x001e:
-                hmretval.put("0", "No Correction");
-                hmretval.put("1", "Differential Corrected");
+                olretval.add(new ComboItem("", "None"));
+                olretval.add(new ComboItem("0", "No Correction"));
+                olretval.add(new ComboItem("1", "Differential Corrected"));
+                break;
             default:
                 break;
         }
-        return hmretval;
+        return olretval;
     }
 
-    public HashMap<String, String> RootOptionSelectionMap(Integer tag) {
-        HashMap<String, String> hmretval = new HashMap<>();
+    public static ArrayList<ComboItem> rootOptionSelectionMap(Integer tag) {
+        ArrayList<ComboItem> olretval = new ArrayList<>();
 
         switch (tag) {
             case 0x0001:
-                hmretval.put("R03", "DCF Option File");
-                hmretval.put("R98", "DCF Basic File");
-                hmretval.put("THM", "DCF Thumbnail File");
+                olretval.add(new ComboItem("", "None"));
+                olretval.add(new ComboItem("R03", "DCF Option File"));
+                olretval.add(new ComboItem("R98", "DCF Basic File"));
+                olretval.add(new ComboItem("THM", "DCF Thumbnail File"));
                 break;
             case 0x00fe:
-                // hmretval.put(null, null);
+                // olretval.add(new);
                 break;
             default:
                 break;
         }
-        return hmretval;
+        return olretval;
     }
     // #endregion
 }

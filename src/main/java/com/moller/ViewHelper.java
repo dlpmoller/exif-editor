@@ -1,10 +1,16 @@
 package com.moller;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+
+import com.moller.Models.ComboItem;
+import com.moller.Models.MetadataCharts;
+import com.moller.ViewModifications.ComboItemListCell;
 
 import javafx.geometry.Insets;
 import javafx.scene.Node;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
@@ -27,6 +33,8 @@ public class ViewHelper {
         Boolean bretval = HelperClass.GetDirectories(metadataDirectories, imgFile);
 
         // Nested for loops due to nested hashmaps. Bad idea?
+        // The bad idea is because it starts from the hashmap that was added most
+        // recently.
         for (var directory : metadataDirectories.entrySet()) {
             GridPane directoryLabel = new GridPane();
             directoryLabel.setPadding(new Insets(10, 10, 10, 10));
@@ -65,10 +73,48 @@ public class ViewHelper {
         // Pulling on the tagset to find the name for the hex ID.
         fieldName.setText(HelperClass.IdentifyEXIFTag(tag, directory));
         gpretval.add(fieldName, 0, 0);
-        TextField valueField = new TextField();
-        valueField.setText(value);
+        Node valueField = createValueField(tag, value, directory);
         gpretval.add(valueField, 0, 1);
         return gpretval;
+    }
+
+    /**
+     * This method checks whether to make a {@code ComboBox} or a {@code TextField}
+     * depending on if there's a populated hashmap associated with the tag.
+     *
+     * @param tag
+     * @param value     Text
+     * @param directory The directory the tag is from.
+     * @return
+     */
+    private static Node createValueField(Integer tag, String value, String directory) {
+        ArrayList<ComboItem> optionList = new ArrayList<>();
+
+        // TODO: Find a better way of doing that.
+        switch (directory) {
+            case "EXIF Data":
+                optionList = MetadataCharts.rootOptionSelectionMap(tag);
+                break;
+            case "GPS Data":
+                optionList = MetadataCharts.gpsOptionSelectionMap(tag);
+                break;
+
+            default:
+                break;
+        }
+
+        if (optionList.size() > 0) {
+            ComboBox<ComboItem> comboList = new ComboBox<>();
+            comboList.getItems().addAll(optionList);
+            comboList.setCellFactory(lv -> new ComboItemListCell());
+            comboList.setButtonCell(new ComboItemListCell());
+
+            return comboList;
+        } else {
+            TextField valueField = new TextField();
+            valueField.setText(value);
+            return valueField;
+        }
     }
 
     /**

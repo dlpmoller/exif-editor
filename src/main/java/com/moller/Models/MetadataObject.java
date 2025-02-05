@@ -23,19 +23,19 @@ public class MetadataObject {
         valueLength = length;
     }
 
-    public Integer getMetadataId() {
+    public Integer GetMetadataId() {
         return metadataId;
     }
 
-    public String getMetadataTag() {
+    public String GetMetadataTag() {
         return metadataTag;
     }
 
-    public String getValueType() {
+    public String GetValueType() {
         return valueType;
     }
 
-    public Integer getValueLength() {
+    public Integer GetValueLength() {
         return valueLength;
     }
 }

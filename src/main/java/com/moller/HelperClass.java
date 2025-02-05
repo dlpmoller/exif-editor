@@ -46,8 +46,9 @@ public class HelperClass {
         String sretval = "Unknown Tag (" + tag.toString() + ")";
         MetadataObject[] tagSet = null;
 
+        // TODO: Find way to make this less obtuse to debug! Add .ToLower or something?
         switch (directory) {
-            case "Exif Data":
+            case "EXIF Data":
                 tagSet = MetadataCharts.GetExifDirectory();
                 break;
             case "GPS Data":
@@ -59,8 +60,8 @@ public class HelperClass {
 
         if (tagSet != null) {
             for (MetadataObject metadataObject : tagSet) {
-                if (tag == metadataObject.getMetadataId()) {
-                    sretval = metadataObject.getMetadataTag();
+                if (tag == metadataObject.GetMetadataId()) {
+                    sretval = metadataObject.GetMetadataTag();
                     break;
                 }
             }
@@ -154,12 +155,12 @@ public class HelperClass {
         bretval = true;
         if (!value.isBlank() || !value.isEmpty()) {
             for (MetadataObject metadataTag : tagList) {
-                if (metadataTag.getMetadataId() == tag) {
-                    if (metadataTag.getValueType() != null) {
+                if (metadataTag.GetMetadataId() == tag) {
+                    if (metadataTag.GetValueType() != null) {
                         addFieldToOutput(outputDir, metadataTag, value);
                     } else {
                         System.out.print(
-                                "Write action for tag " + metadataTag.getMetadataTag() + " has not been created.");
+                                "Write action for tag " + metadataTag.GetMetadataTag() + " has not been created.");
                     }
                 }
             }
@@ -177,11 +178,11 @@ public class HelperClass {
     private static Boolean addFieldToOutput(TiffOutputDirectory outputDir, MetadataObject tag, String value) {
         Boolean bretval = false;
         try {
-            switch (tag.getValueType()) {
+            switch (tag.GetValueType()) {
                 case "String":
                     outputDir.add(
                             new TagInfoAscii(
-                                    tag.getMetadataTag(), tag.getMetadataId(), tag.getValueLength(),
+                                    tag.GetMetadataTag(), tag.GetMetadataId(), tag.GetValueLength(),
                                     TiffDirectoryType.TIFF_DIRECTORY_ROOT));
                     bretval = true;
                     break;
@@ -303,7 +304,7 @@ public class HelperClass {
                     metadataValue = exifField.getValue().toString();
                 }
 
-                exifDirectory.put(tag.getMetadataId(), metadataValue);
+                exifDirectory.put(tag.GetMetadataId(), metadataValue);
             }
 
         } catch (ImagingException imgEx) {
@@ -334,22 +335,25 @@ public class HelperClass {
                 String metadataValue = "";
                 // if Latitude(0x0002) or Longitude(0x0004) crops up, just make the Imaging
                 // library do it.
-                if (tag.getMetadataId() == 0x0002) {
+                if (tag.GetMetadataId() == 0x0002) {
                     if (gpsData != null) {
                         metadataValue = Double.toString(gpsData.getLatitudeAsDegreesNorth());
                     }
-                } else if (tag.getMetadataId() == 0x0004) {
+                } else if (tag.GetMetadataId() == 0x0004) {
                     if (gpsData != null) {
                         metadataValue = Double.toString(gpsData.getLongitudeAsDegreesEast());
                     }
                 } else {
-                    TiffField gpsField = gpsDir.findField(createField(tag, "GPS"));
-                    if (gpsField != null) {
-                        metadataValue = gpsField.getValue().toString();
+                    if (gpsDir != null) {
+                        final TagInfo tagToFind = createField(tag, "GPS");
+                        TiffField gpsField = gpsDir.findField(tagToFind);
+                        if (gpsField != null) {
+                            metadataValue = gpsField.getValue().toString();
+                        }
                     }
                 }
 
-                directoryMap.put(tag.getMetadataId(), metadataValue);
+                directoryMap.put(tag.GetMetadataId(), metadataValue);
             }
 
         } catch (ImagingException imgEx) {
@@ -373,16 +377,16 @@ public class HelperClass {
      */
     private static TagInfo createField(MetadataObject tag, String directory) {
         // Determine AbstractFieldType through the value type described in the char
-        AbstractFieldType fieldType = getFieldType(tag.getValueType());
+        AbstractFieldType fieldType = getFieldType(tag.GetValueType());
         TiffDirectoryType directoryType = getDirectoryType(directory);
 
         // Looking at the way Apache does things, they seem to use -1 as no limit.
-        int length = tag.getValueLength();
+        int length = tag.GetValueLength();
         if (length == 0) {
             length = -1;
         }
 
-        return new TagInfo(tag.getMetadataTag(), tag.getMetadataId(), fieldType, length,
+        return new TagInfo(tag.GetMetadataTag(), tag.GetMetadataId(), fieldType, length,
                 directoryType);
     }
 
@@ -425,6 +429,9 @@ public class HelperClass {
                 break;
             case "Long":
                 fieldtyperetval = AbstractFieldType.LONG;
+                break;
+            case "Bytes":
+                fieldtyperetval = AbstractFieldType.BYTE;
                 break;
         }
 
