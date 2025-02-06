@@ -3,11 +3,13 @@ package com.moller;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 
 import com.moller.Models.ComboItem;
 import com.moller.Models.MetadataCharts;
 import com.moller.ViewModifications.ComboItemListCell;
 
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
@@ -86,6 +88,7 @@ public class ViewHelper {
      * @param value     Text
      * @param directory The directory the tag is from.
      * @return
+     * @see {@link https://stackoverflow.com/a/43586473}
      */
     private static Node createValueField(Integer tag, String value, String directory) {
         ArrayList<ComboItem> optionList = new ArrayList<>();
@@ -106,6 +109,11 @@ public class ViewHelper {
         if (optionList.size() > 0) {
             ComboBox<ComboItem> comboList = new ComboBox<>();
             comboList.getItems().addAll(optionList);
+            for (ComboItem comboItem : optionList) {
+                if (value == comboItem.GetValue()) {
+                    comboList.setValue(comboItem);
+                }
+            }
             comboList.setCellFactory(lv -> new ComboItemListCell());
             comboList.setButtonCell(new ComboItemListCell());
 
@@ -147,6 +155,79 @@ public class ViewHelper {
                 tagField.setDisable(false);
             }
         }
+    }
+
+    public static Boolean prepForMetadataSaving(String destination, String imgFile) {
+        Boolean bretval = true;
+
+        if (destination.isBlank() || destination.isEmpty()) {
+            return false;
+        }
+
+        String imagePathSections[] = imgFile.split(File.pathSeparator);
+        String completeDestination = destination + File.pathSeparator + imagePathSections[imagePathSections.length - 1];
+
+        if (imgFile.toLowerCase(Locale.getDefault()).equals(completeDestination.toLowerCase(Locale.getDefault()))) {
+            bretval = false;
+        }
+
+        return bretval;
+    }
+
+    public static void saveMetadata(FlowPane contentPane, File imgFile) {
+        HashMap<String, HashMap<Integer, String>> valuesToSave = new HashMap<>();
+        Boolean successfulExtraction = extractValues(valuesToSave, contentPane);
+    }
+
+    private static Boolean extractValues(HashMap<String, HashMap<Integer, String>> valuesToSave, FlowPane contentPane) {
+        Boolean bretval = false;
+        String currentDirectory = "";
+        for (Node node : contentPane.getChildren()) {
+            GridPane metadataField = (GridPane) node;
+
+            if (metadataField.getChildren().size() == 1) {
+                currentDirectory = extractValueFromNode(metadataField.getChildren())[0];
+                valuesToSave.put(currentDirectory, new HashMap<>());
+            } else {
+                String[] extractedValues = extractValueFromNode(metadataField.getChildren());
+                valuesToSave.get(currentDirectory).put(Integer.parseInt(extractedValues[0]), extractedValues[1]);
+            }
+        }
+        return bretval;
+    }
+
+    /**
+     * Extracts values from TextFields or ComboBoxes.
+     * The first index can either be a directory name or the tag ID corresponding to
+     * the value.
+     *
+     * @param observableList The Node to extract data from.
+     * @return The String values from the node.
+     */
+    private static String[] extractValueFromNode(ObservableList<Node> observableList) {
+        String[] saretval = { "", "" };
+        Label valueLabel = (Label) observableList.get(0);
+
+        if (observableList.size() == 1) {
+            saretval[0] = valueLabel.getText();
+            return saretval;
+        }
+
+        // Grab the associated ID
+        saretval[0] = valueLabel.getTooltip().getText();
+
+        // It's either TextFields or ComboBoxes, so using a try-catch as an either-or
+        // works fine. I think.
+        try {
+            TextField valueField = (TextField) observableList.get(1);
+            saretval[1] = valueField.getText();
+        } catch (ClassCastException e) {
+            // If it's not a TextField, it's a ComboBox.
+            ComboBox<ComboItem> valueCombo = (ComboBox) observableList.get(1);
+            saretval[1] = valueCombo.getValue().GetValue();
+        }
+
+        return saretval;
     }
 
 }

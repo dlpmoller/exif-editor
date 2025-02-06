@@ -123,17 +123,6 @@ public class HelperClass {
             TextField valueField = (TextField) metadataField.getChildren().get(1);
             // Test to see if value extraction works like that.
             System.out.println(tagField.getText() + ": " + valueField.getText());
-            // TODO: Find better way to implement tag selection
-            switch (tagField.getText()) {
-                case "LatitudeNorth":
-                    latitude = Double.valueOf(valueField.getText());
-                case "LongitudeEast":
-                    longitude = Double.valueOf(valueField.getText());
-                    break;
-
-                default:
-                    break;
-            }
         }
     }
 

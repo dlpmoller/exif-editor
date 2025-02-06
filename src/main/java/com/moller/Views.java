@@ -103,7 +103,7 @@ public class Views {
                         chosenImage.setImage(new Image(imgFile.toURI().toURL().toExternalForm()));
                         ViewHelper.DisplayImageMetadata(contentPane, imgFile);
                     } catch (MalformedURLException e) {
-                        // TODO Auto-generated catch block
+                        // TODO Can a malformed URL even point towards a file that exists?
                         e.printStackTrace();
                     }
                 } else {
@@ -137,9 +137,14 @@ public class Views {
         saveButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent e) {
-                // TODO: Create popup asking for confirmation to overwrite if there's a danger
-                // of doing so.
-                HelperClass.SaveMetadataEdits(contentPane, new File(fileChoiceField.getText()));
+                Boolean noConflicts = ViewHelper.prepForMetadataSaving(
+                        fileChoiceField.getText(),
+                        destinationField.getText());
+
+                if (noConflicts) {
+                    ViewHelper.saveMetadata(contentPane, new File(fileChoiceField.getText()));
+                }
+
                 fileChoiceField.setText("");
             }
 
