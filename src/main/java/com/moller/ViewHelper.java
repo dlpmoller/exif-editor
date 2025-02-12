@@ -177,6 +177,10 @@ public class ViewHelper {
     public static void saveMetadata(FlowPane contentPane, File imgFile) {
         HashMap<String, HashMap<Integer, String>> valuesToSave = new HashMap<>();
         Boolean successfulExtraction = extractValues(valuesToSave, contentPane);
+
+        if (successfulExtraction) {
+            HelperClass.SaveMetadataEdits(valuesToSave, imgFile);
+        }
     }
 
     private static Boolean extractValues(HashMap<String, HashMap<Integer, String>> valuesToSave, FlowPane contentPane) {

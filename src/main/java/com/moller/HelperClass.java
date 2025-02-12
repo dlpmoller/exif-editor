@@ -21,16 +21,13 @@ import org.apache.commons.imaging.formats.tiff.fieldtypes.AbstractFieldType;
 import org.apache.commons.imaging.formats.tiff.taginfos.TagInfo;
 import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoAscii;
 import org.apache.commons.imaging.formats.tiff.write.TiffOutputDirectory;
+import org.apache.commons.imaging.formats.tiff.write.TiffOutputField;
 import org.apache.commons.imaging.formats.tiff.write.TiffOutputSet;
 
 import com.moller.Models.MetadataCharts;
 import com.moller.Models.MetadataObject;
 
-import javafx.scene.Node;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.GridPane;
 
 public class HelperClass {
 
@@ -46,7 +43,6 @@ public class HelperClass {
         String sretval = "Unknown Tag (" + tag.toString() + ")";
         MetadataObject[] tagSet = null;
 
-        // TODO: Find way to make this less obtuse to debug! Add .ToLower or something?
         switch (directory) {
             case "EXIF Data":
                 tagSet = MetadataCharts.GetExifDirectory();
@@ -73,18 +69,18 @@ public class HelperClass {
     /**
      * Saves the metadata if there's any changes to the value specified.
      *
-     * @param contentPane The metadata from the GUI.
-     * @param imgFile     The image file to save the metadata to.
+     * @param valuesToSave The metadata from the GUI.
+     * @param imgFile      The image file to save the metadata to.
      * @see ViewHelper#DisplayImageMetadata(FlowPane, File)
      * @see ViewHelper#AddMetadataField(String, String)
      */
-    public static void SaveMetadataEdits(FlowPane contentPane, File imgFile) {
-        // TODO: Getting the metadata can be made into it's own thing.
+    public static void SaveMetadataEdits(HashMap<String, HashMap<Integer, String>> valuesToSave, File imgFile) {
         TiffImageMetadata exifData = null;
         TiffOutputSet metadataChanges;
-        TiffOutputDirectory exifDirectory;
-        TiffOutputDirectory gpsDirectory;
-        TiffOutputDirectory rootDirectory;
+
+        // TODO: Research how to make this more sensible.
+        TiffOutputDirectory outputExifDirectory = null;
+        TiffOutputDirectory outputGPSDirectory = null;
         Double latitude = null;
         Double longitude = null;
         JpegImageMetadata jpegImageMetadata = GetMetadataFromImage(imgFile);
@@ -95,34 +91,37 @@ public class HelperClass {
             }
 
             if (exifData != null) {
-
                 metadataChanges = exifData.getOutputSet();
 
             } else {
                 metadataChanges = new TiffOutputSet();
             }
 
-            exifDirectory = metadataChanges.getOrCreateExifDirectory();
-            gpsDirectory = metadataChanges.getOrCreateGpsDirectory();
+            for (var directory : valuesToSave.entrySet()) {
+                switch (directory.getKey()) {
+                    case "EXIF Data":
+                        outputExifDirectory = metadataChanges.getOrCreateExifDirectory();
+                        for (var fieldToSave : directory.getValue().entrySet()) {
+                            handleOutputField(outputExifDirectory, directory.getKey(), fieldToSave.getKey(),
+                                    fieldToSave.getValue());
+                        }
+                        break;
+                    case "GPS Data":
+                        outputGPSDirectory = metadataChanges.getOrCreateGpsDirectory();
+                        for (var fieldToSave : directory.getValue().entrySet()) {
+                            handleOutputField(outputGPSDirectory, directory.getKey(), fieldToSave.getKey(),
+                                    fieldToSave.getValue());
+                        }
+                        break;
+                    default:
+                        // TODO: Find out what to do in case of unknown directory.
+                        break;
+                }
+            }
 
         } catch (ImagingException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        }
-        // TODO: Directory name dictates OutputSet
-        for (Node node : contentPane.getChildren()) {
-            GridPane metadataField = (GridPane) node;
-            // Refer to DisplayImageMetadata method for the order and element types of the
-            // contents.
-            if (metadataField.getChildren().size() == 1) {
-                // TODO: Create method to initialize and iterate through directories. Likely
-                // with Hashmaps again.
-            }
-            // TODO: Add this part to ViewHelper
-            Label tagField = (Label) metadataField.getChildren().get(0);
-            TextField valueField = (TextField) metadataField.getChildren().get(1);
-            // Test to see if value extraction works like that.
-            System.out.println(tagField.getText() + ": " + valueField.getText());
         }
     }
 
@@ -130,23 +129,38 @@ public class HelperClass {
      * Removes field from the output set and adds the new value if applicable.
      *
      * @param outputDir The output set to remove and add fields to/from.
-     * @param tagList   The list of tags to compare the tag ID to.
+     * @param directory The directory to use for the output set
      * @param tag       The tag ID to save the value to.
      * @param value     The value from the {@code TextField} input.
      * @return Returns the provided output set with the specified field removed or
      *         updated.
      */
-    public static Boolean handleOutputField(TiffOutputDirectory outputDir, MetadataObject[] tagList,
-            int tag,
-            String value) {
+    public static Boolean handleOutputField(TiffOutputDirectory outputDir, String directory, int tag, String value) {
+        MetadataObject[] tagList = null;
         Boolean bretval = false;
         outputDir.removeField(tag);
         bretval = true;
+
+        switch (directory) {
+            case "EXIF Data":
+                tagList = MetadataCharts.GetExifDirectory();
+                break;
+            case "GPS Data":
+                tagList = MetadataCharts.GetGPSDirectory();
+                break;
+            default:
+                break;
+        }
+
+        if (tagList == null) {
+            return bretval;
+        }
+
         if (!value.isBlank() || !value.isEmpty()) {
             for (MetadataObject metadataTag : tagList) {
                 if (metadataTag.GetMetadataId() == tag) {
                     if (metadataTag.GetValueType() != null) {
-                        addFieldToOutput(outputDir, metadataTag, value);
+                        addFieldToOutput(outputDir, metadataTag, value, directory);
                     } else {
                         System.out.print(
                                 "Write action for tag " + metadataTag.GetMetadataTag() + " has not been created.");
@@ -162,17 +176,18 @@ public class HelperClass {
      * @param outputDir
      * @param tag
      * @param value
+     * @param directory
      * @return
      */
-    private static Boolean addFieldToOutput(TiffOutputDirectory outputDir, MetadataObject tag, String value) {
+    private static Boolean addFieldToOutput(TiffOutputDirectory outputDir, MetadataObject tag, String value,
+            String directory) {
         Boolean bretval = false;
         try {
             switch (tag.GetValueType()) {
                 case "String":
                     outputDir.add(
-                            new TagInfoAscii(
-                                    tag.GetMetadataTag(), tag.GetMetadataId(), tag.GetValueLength(),
-                                    TiffDirectoryType.TIFF_DIRECTORY_ROOT));
+                            new TiffOutputField(createField(tag, value), getFieldType(tag.GetValueType()), 0, null));
+                    outputDir.add(new TagInfoAscii(directory, 0, 0, null), null);
                     bretval = true;
                     break;
 
@@ -356,7 +371,7 @@ public class HelperClass {
 
     // #region TiffField creation
     /**
-     * Returns a {@code TagInfo} bound for the GPS directory.
+     * Returns a {@code TagInfo}.
      *
      * @param tag       The metadata tag to base the TagInfo on.
      * @param directory The directory the field resides in. Used values are so far:
@@ -379,14 +394,24 @@ public class HelperClass {
                 directoryType);
     }
 
+    /**
+     * Returns a {@code TiffDirectoryType} value depending on the directory String
+     * value.
+     *
+     * @param directory
+     * @return Returns {@code TiffDirectoryType.EXIF_DIRECTORY_UNKNOWN} if the
+     *         provided value is not recognized.
+     */
     private static TiffDirectoryType getDirectoryType(String directory) {
         TiffDirectoryType dirretval = TiffDirectoryType.EXIF_DIRECTORY_UNKNOWN;
 
         switch (directory) {
             case "Root":
+            case "EXIF Data":
                 dirretval = TiffDirectoryType.TIFF_DIRECTORY_ROOT;
                 break;
             case "GPS":
+            case "GPS Data":
                 dirretval = TiffDirectoryType.EXIF_DIRECTORY_GPS;
                 break;
             case "IPTC":
@@ -399,9 +424,12 @@ public class HelperClass {
     }
 
     /**
+     * Provides a {@code AbstractFieldType} value depending on the tag's value type
      *
-     * @param valueType
-     * @return
+     * @param valueType The value type to evaluate
+     * @return An {@code AbstractFieldType} appropriate for the given String value.
+     *         Or {@code AbstractFieldType.UNDEFINED} if the specified value type is
+     *         not recognized.
      */
     private static AbstractFieldType getFieldType(String valueType) {
         AbstractFieldType fieldtyperetval = AbstractFieldType.UNDEFINED;
