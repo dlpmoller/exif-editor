@@ -20,8 +20,9 @@ import org.apache.commons.imaging.formats.tiff.constants.TiffDirectoryType;
 import org.apache.commons.imaging.formats.tiff.fieldtypes.AbstractFieldType;
 import org.apache.commons.imaging.formats.tiff.taginfos.TagInfo;
 import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoAscii;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoLong;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoShort;
 import org.apache.commons.imaging.formats.tiff.write.TiffOutputDirectory;
-import org.apache.commons.imaging.formats.tiff.write.TiffOutputField;
 import org.apache.commons.imaging.formats.tiff.write.TiffOutputSet;
 
 import com.moller.Models.MetadataCharts;
@@ -32,14 +33,15 @@ import javafx.scene.layout.FlowPane;
 public class HelperClass {
 
     /**
+     * This method puts a human readable name to the given tag.
      *
-     * @param tag
-     * @param directory
-     * @return
+     * @param tag       The tag to name.
+     * @param directory The directory it's found in
+     * @return A string containing the name of the tag.
      * @see HelperClass#GetDirectories(HashMap, File)
      * @see MetadataCharts
      */
-    public static String IdentifyEXIFTag(Integer tag, String directory) {
+    public static String identifyEXIFTag(Integer tag, String directory) {
         String sretval = "Unknown Tag (" + tag.toString() + ")";
         MetadataObject[] tagSet = null;
 
@@ -74,15 +76,13 @@ public class HelperClass {
      * @see ViewHelper#DisplayImageMetadata(FlowPane, File)
      * @see ViewHelper#AddMetadataField(String, String)
      */
-    public static void SaveMetadataEdits(HashMap<String, HashMap<Integer, String>> valuesToSave, File imgFile) {
+    public static void saveMetadataEdits(HashMap<String, HashMap<Integer, String>> valuesToSave, File imgFile) {
         TiffImageMetadata exifData = null;
         TiffOutputSet metadataChanges;
 
         // TODO: Research how to make this more sensible.
         TiffOutputDirectory outputExifDirectory = null;
         TiffOutputDirectory outputGPSDirectory = null;
-        Double latitude = null;
-        Double longitude = null;
         JpegImageMetadata jpegImageMetadata = GetMetadataFromImage(imgFile);
 
         try {
@@ -108,10 +108,31 @@ public class HelperClass {
                         break;
                     case "GPS Data":
                         outputGPSDirectory = metadataChanges.getOrCreateGpsDirectory();
+                        Double latitude = 0.0;
+                        Double longitude = 0.0;
                         for (var fieldToSave : directory.getValue().entrySet()) {
-                            handleOutputField(outputGPSDirectory, directory.getKey(), fieldToSave.getKey(),
-                                    fieldToSave.getValue());
+                            if (fieldToSave.getKey() != 0x0002 || fieldToSave.getKey() != 0x0004) {
+                                handleOutputField(outputGPSDirectory, directory.getKey(),
+                                        fieldToSave.getKey(),
+                                        fieldToSave.getValue());
+                            } else {
+                                try {
+                                    switch (fieldToSave.getKey()) {
+                                        case 0x0002:
+                                            latitude = Double.parseDouble(fieldToSave.getValue());
+                                            break;
+                                        case 0x0004:
+                                            longitude = Double.parseDouble(fieldToSave.getValue());
+                                            break;
+                                    }
+                                } catch (NumberFormatException numEx) {
+                                    // TODO: Setup proper error handling.
+                                }
+
+                            }
+
                         }
+                        metadataChanges.setGpsInDegrees(longitude, latitude);
                         break;
                     default:
                         // TODO: Find out what to do in case of unknown directory.
@@ -160,7 +181,7 @@ public class HelperClass {
             for (MetadataObject metadataTag : tagList) {
                 if (metadataTag.GetMetadataId() == tag) {
                     if (metadataTag.GetValueType() != null) {
-                        addFieldToOutput(outputDir, metadataTag, value, directory);
+                        addFieldToOutput(outputDir, metadataTag, value);
                     } else {
                         System.out.print(
                                 "Write action for tag " + metadataTag.GetMetadataTag() + " has not been created.");
@@ -172,29 +193,44 @@ public class HelperClass {
     }
 
     /**
+     * Creates output field to add to the output directory.
      *
-     * @param outputDir
-     * @param tag
-     * @param value
-     * @param directory
+     * @param outputDir The directory to add the new field to.
+     * @param tag       The {@code MetadataObject} used for reference
+     * @param value     The value to add.
+     * @param directory The directory
      * @return
      */
-    private static Boolean addFieldToOutput(TiffOutputDirectory outputDir, MetadataObject tag, String value,
-            String directory) {
+    private static Boolean addFieldToOutput(TiffOutputDirectory outputDir, MetadataObject tag, String value) {
         Boolean bretval = false;
         try {
+            TagInfo field = createField(tag, value);
             switch (tag.GetValueType()) {
                 case "String":
-                    outputDir.add(
-                            new TiffOutputField(createField(tag, value), getFieldType(tag.GetValueType()), 0, null));
-                    outputDir.add(new TagInfoAscii(directory, 0, 0, null), null);
-                    bretval = true;
+                    TagInfoAscii asciiField = (TagInfoAscii) field;
+                    outputDir.add(asciiField, value);
                     break;
-
+                case "Short":
+                    TagInfoShort shortField = (TagInfoShort) field;
+                    outputDir.add(shortField, Short.parseShort(value));
+                    break;
+                case "Long":
+                    TagInfoLong longField = (TagInfoLong) field;
+                    outputDir.add(longField, Integer.parseInt(value));
+                    break;
+                case "Rational":
+                    break;
+                case "Rationals":
+                    break;
+                case "Bytes":
+                    break;
                 default:
                     break;
             }
-        } catch (ImagingException imgEx) {
+
+            bretval = true;
+
+        } catch (Exception imgEx) {
             // TODO: handle exception
             System.err.println(imgEx);
         }
@@ -206,7 +242,7 @@ public class HelperClass {
      * Retrieves metadata from the given image
      *
      * @param imgFile The Image to extract EXIF/GPS/IPTC data from
-     * @return Uhhhh
+     * @return Returns a null value if the image has no metadata.
      */
     public static JpegImageMetadata GetMetadataFromImage(File imgFile) {
         JpegImageMetadata jimretval = null;
@@ -244,18 +280,18 @@ public class HelperClass {
             case "jpeg":
                 // Fetch JPEG metadata. May be null.
                 JpegImageMetadata jpgMetaData = GetMetadataFromImage(imgFile);
-                if (jpgMetaData != null) {
-                    // Fetch specific directories. May be null.
-                    TiffImageMetadata exifMetadata = jpgMetaData.getExif();
-                    JpegPhotoshopMetadata iptcMetadata = jpgMetaData.getPhotoshop();
 
-                    HashMap<Integer, String> exifDirectory = new HashMap<>();
-                    HashMap<Integer, String> gpsHashMap = new HashMap<>();
+                HashMap<Integer, String> exifDirectory = new HashMap<>();
+                HashMap<Integer, String> gpsHashMap = new HashMap<>();
 
-                    Boolean generatedGPSDirectory = getGPSInfo(exifMetadata, gpsHashMap);
-                    Boolean generatedRootDirectory = getExifInfo(exifMetadata, exifDirectory);
+                Boolean generatedGPSDirectory = getGPSInfo(jpgMetaData, gpsHashMap);
+                Boolean generatedRootDirectory = getExifInfo(jpgMetaData, exifDirectory);
 
+                if (generatedRootDirectory) {
                     metadataDirectories.put("EXIF Data", exifDirectory);
+                }
+
+                if (generatedGPSDirectory) {
                     metadataDirectories.put("GPS Data", gpsHashMap);
                 }
 
@@ -273,6 +309,12 @@ public class HelperClass {
 
     }
 
+    /**
+     * Extracts the IPTC data from the image metadata provided.
+     *
+     * @param photoshop The image metadata to read from.
+     * @return Returns a hashmap of the values extracted.
+     */
     private static HashMap<String, String> GetIPTCInfo(JpegPhotoshopMetadata photoshop) {
         HashMap<String, String> hmretval = new HashMap<>();
 
@@ -291,26 +333,36 @@ public class HelperClass {
     /**
      * Extracts the EXIF data from the image metadata provided.
      *
-     * @param exifMetadata  The image metadata to read from.
+     * @param jpgMetaData   The image metadata to read from.
      * @param exifDirectory The hashmap to add extracted data into.
      * @return Whether the data pull completed successfully or not.
      */
-    private static Boolean getExifInfo(TiffImageMetadata exifMetadata, HashMap<Integer, String> exifDirectory) {
+    private static Boolean getExifInfo(JpegImageMetadata jpgMetaData, HashMap<Integer, String> exifDirectory) {
         Boolean bretval = false;
         MetadataObject[] exifTags = MetadataCharts.GetExifDirectory();
+        TiffImageMetadata exifData = null;
 
         try {
+            if (jpgMetaData != null) {
+                exifData = jpgMetaData.getExif();
+            }
+
             for (MetadataObject tag : exifTags) {
                 String metadataValue = "";
-                TiffField exifField = exifMetadata.findField(createField(tag, "Root"));
+                TiffField exifField = null;
 
-                if (exifField != null) {
-                    metadataValue = exifField.getValue().toString();
+                if (exifData != null) {
+                    exifField = exifData.findField(createField(tag, "Root"));
+
+                    if (exifField != null) {
+                        metadataValue = exifField.getValue().toString();
+                    }
                 }
 
                 exifDirectory.put(tag.GetMetadataId(), metadataValue);
             }
 
+            bretval = true;
         } catch (ImagingException imgEx) {
             imgEx.printStackTrace();
             bretval = false;
@@ -322,18 +374,27 @@ public class HelperClass {
     /**
      * Extracts the GPS directory metadata from the EXIF data.
      *
-     * @param exifMetadata the image metadata to read data from.
+     * @param jpgMetaData  the image metadata to read data from.
      * @param directoryMap The hashmap to insert data into.
      * @return Whether the data pull completed successfully or not.
      */
-    private static Boolean getGPSInfo(TiffImageMetadata exifMetadata, HashMap<Integer, String> directoryMap) {
+    private static Boolean getGPSInfo(JpegImageMetadata jpgMetaData, HashMap<Integer, String> directoryMap) {
         Boolean bretval = false;
         MetadataObject[] gpsTags = MetadataCharts.GetGPSDirectory();
-        TiffDirectory gpsDir = exifMetadata.findDirectory(TiffDirectoryConstants.DIRECTORY_TYPE_GPS);
+        TiffImageMetadata exifData = null;
+        TiffDirectory gpsDir = null;
+        GpsInfo gpsData = null;
 
         try {
-            // Pull GPSInfo. May be null.
-            GpsInfo gpsData = exifMetadata.getGpsInfo();
+            if (jpgMetaData != null) {
+                exifData = jpgMetaData.getExif();
+
+                // Pull GPS info. May be null.
+                if (exifData != null) {
+                    gpsDir = exifData.findDirectory(TiffDirectoryConstants.DIRECTORY_TYPE_GPS);
+                    gpsData = exifData.getGpsInfo();
+                }
+            }
 
             for (MetadataObject tag : gpsTags) {
                 String metadataValue = "";
@@ -359,6 +420,7 @@ public class HelperClass {
 
                 directoryMap.put(tag.GetMetadataId(), metadataValue);
             }
+            bretval = true;
 
         } catch (ImagingException imgEx) {
             // TODO Auto-generated catch block

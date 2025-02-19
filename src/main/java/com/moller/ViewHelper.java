@@ -73,7 +73,7 @@ public class ViewHelper {
         Label fieldName = new Label();
         fieldName.setTooltip(new Tooltip(tag.toString()));
         // Pulling on the tagset to find the name for the hex ID.
-        fieldName.setText(HelperClass.IdentifyEXIFTag(tag, directory));
+        fieldName.setText(HelperClass.identifyEXIFTag(tag, directory));
         gpretval.add(fieldName, 0, 0);
         Node valueField = createValueField(tag, value, directory);
         gpretval.add(valueField, 0, 1);
@@ -179,7 +179,7 @@ public class ViewHelper {
         Boolean successfulExtraction = extractValues(valuesToSave, contentPane);
 
         if (successfulExtraction) {
-            HelperClass.SaveMetadataEdits(valuesToSave, imgFile);
+            HelperClass.saveMetadataEdits(valuesToSave, imgFile);
         }
     }
 
