@@ -1,6 +1,7 @@
 package com.moller;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
@@ -157,15 +158,16 @@ public class ViewHelper {
         }
     }
 
-    public static Boolean prepForMetadataSaving(String destination, String imgFile) {
+    public static Boolean prepForMetadataSaving(String imgFile, String destination) {
         Boolean bretval = true;
+        Path fileToEdit = Path.of(imgFile);
 
         if (destination.isBlank() || destination.isEmpty()) {
             return false;
         }
 
-        String imagePathSections[] = imgFile.split(File.pathSeparator);
-        String completeDestination = destination + File.pathSeparator + imagePathSections[imagePathSections.length - 1];
+        String imageName = fileToEdit.getFileName().toString();
+        String completeDestination = destination + File.separator + imageName;
 
         if (imgFile.toLowerCase(Locale.getDefault()).equals(completeDestination.toLowerCase(Locale.getDefault()))) {
             bretval = false;
@@ -174,30 +176,26 @@ public class ViewHelper {
         return bretval;
     }
 
-    public static void saveMetadata(FlowPane contentPane, File imgFile) {
-        HashMap<String, HashMap<Integer, String>> valuesToSave = new HashMap<>();
-        Boolean successfulExtraction = extractValues(valuesToSave, contentPane);
-
-        if (successfulExtraction) {
-            HelperClass.saveMetadataEdits(valuesToSave, imgFile);
-        }
+    public static void saveMetadata(FlowPane contentPane, File imgFile, File destination) {
+        HashMap<String, HashMap<Integer, String>> valuesToSave = extractValues(contentPane);
+        HelperClass.saveMetadataEdits(valuesToSave, imgFile, destination);
     }
 
-    private static Boolean extractValues(HashMap<String, HashMap<Integer, String>> valuesToSave, FlowPane contentPane) {
-        Boolean bretval = false;
+    private static HashMap<String, HashMap<Integer, String>> extractValues(FlowPane contentPane) {
+        HashMap<String, HashMap<Integer, String>> hmretval = new HashMap<>();
         String currentDirectory = "";
         for (Node node : contentPane.getChildren()) {
             GridPane metadataField = (GridPane) node;
 
             if (metadataField.getChildren().size() == 1) {
                 currentDirectory = extractValueFromNode(metadataField.getChildren())[0];
-                valuesToSave.put(currentDirectory, new HashMap<>());
+                hmretval.put(currentDirectory, new HashMap<>());
             } else {
                 String[] extractedValues = extractValueFromNode(metadataField.getChildren());
-                valuesToSave.get(currentDirectory).put(Integer.parseInt(extractedValues[0]), extractedValues[1]);
+                hmretval.get(currentDirectory).put(Integer.parseInt(extractedValues[0]), extractedValues[1]);
             }
         }
-        return bretval;
+        return hmretval;
     }
 
     /**

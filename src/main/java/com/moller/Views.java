@@ -5,7 +5,6 @@ import java.net.MalformedURLException;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -134,15 +133,16 @@ public class Views {
 
         Button saveButton = new Button();
         saveButton.setText("Save Edits");
-        saveButton.setOnAction(new EventHandler<ActionEvent>() {
+        saveButton.setOnMouseReleased(new EventHandler<Event>() {
             @Override
-            public void handle(ActionEvent e) {
+            public void handle(Event e) {
                 Boolean noConflicts = ViewHelper.prepForMetadataSaving(
                         fileChoiceField.getText(),
                         destinationField.getText());
 
                 if (noConflicts) {
-                    ViewHelper.saveMetadata(contentPane, new File(fileChoiceField.getText()));
+                    ViewHelper.saveMetadata(contentPane, new File(fileChoiceField.getText()),
+                            new File(destinationField.getText()));
                 }
 
                 fileChoiceField.setText("");

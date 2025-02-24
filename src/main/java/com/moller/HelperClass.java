@@ -1,14 +1,21 @@
 package com.moller;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.imaging.Imaging;
 import org.apache.commons.imaging.ImagingException;
+import org.apache.commons.imaging.common.RationalNumber;
 import org.apache.commons.imaging.formats.jpeg.JpegImageMetadata;
 import org.apache.commons.imaging.formats.jpeg.JpegPhotoshopMetadata;
+import org.apache.commons.imaging.formats.jpeg.exif.ExifRewriter;
 import org.apache.commons.imaging.formats.jpeg.iptc.IptcRecord;
 import org.apache.commons.imaging.formats.jpeg.iptc.PhotoshopApp13Data;
 import org.apache.commons.imaging.formats.tiff.TiffDirectory;
@@ -21,6 +28,7 @@ import org.apache.commons.imaging.formats.tiff.fieldtypes.AbstractFieldType;
 import org.apache.commons.imaging.formats.tiff.taginfos.TagInfo;
 import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoAscii;
 import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoLong;
+import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoRational;
 import org.apache.commons.imaging.formats.tiff.taginfos.TagInfoShort;
 import org.apache.commons.imaging.formats.tiff.write.TiffOutputDirectory;
 import org.apache.commons.imaging.formats.tiff.write.TiffOutputSet;
@@ -76,7 +84,12 @@ public class HelperClass {
      * @see ViewHelper#DisplayImageMetadata(FlowPane, File)
      * @see ViewHelper#AddMetadataField(String, String)
      */
-    public static void saveMetadataEdits(HashMap<String, HashMap<Integer, String>> valuesToSave, File imgFile) {
+    public static void saveMetadataEdits(HashMap<String, HashMap<Integer, String>> valuesToSave, File imgFile,
+            File destination) {
+        File destFile = new File(destination + File.separator + imgFile.getName());
+        if (!destFile.exists()) {
+
+        }
         TiffImageMetadata exifData = null;
         TiffOutputSet metadataChanges;
 
@@ -138,9 +151,26 @@ public class HelperClass {
                         // TODO: Find out what to do in case of unknown directory.
                         break;
                 }
+
+                if (imgFile.getPath() != destFile.getPath()) {
+                    if (!destFile.exists()) {
+                        Files.copy(Path.of(imgFile.getPath()), Path.of(destFile.getPath()));
+                    }
+                }
+
+                try (FileOutputStream fileStream = new FileOutputStream(destFile);
+                        OutputStream outputStream = new BufferedOutputStream(fileStream)) {
+                    new ExifRewriter().updateExifMetadataLossless(imgFile, outputStream, metadataChanges);
+                } catch (Exception e) {
+                    // TODO: handle exception
+                    e.printStackTrace();
+                }
             }
 
         } catch (ImagingException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
@@ -207,18 +237,21 @@ public class HelperClass {
             TagInfo field = createField(tag, value);
             switch (tag.GetValueType()) {
                 case "String":
-                    TagInfoAscii asciiField = (TagInfoAscii) field;
+                    TagInfoAscii asciiField = new TagInfoAscii(field.name, field.tag, field.length,
+                            field.directoryType);
                     outputDir.add(asciiField, value);
                     break;
                 case "Short":
-                    TagInfoShort shortField = (TagInfoShort) field;
+                    TagInfoShort shortField = new TagInfoShort(field.name, field.tag, field.directoryType);
                     outputDir.add(shortField, Short.parseShort(value));
                     break;
                 case "Long":
-                    TagInfoLong longField = (TagInfoLong) field;
+                    TagInfoLong longField = new TagInfoLong(field.name, field.tag, field.directoryType);
                     outputDir.add(longField, Integer.parseInt(value));
                     break;
                 case "Rational":
+                    TagInfoRational ratField = new TagInfoRational(field.name, field.tag, field.directoryType);
+                    outputDir.add(ratField, RationalNumber.valueOf(Double.parseDouble(value)));
                     break;
                 case "Rationals":
                     break;
