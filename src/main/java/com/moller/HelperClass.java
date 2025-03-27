@@ -98,7 +98,8 @@ public class HelperClass {
         TiffOutputDirectory outputGPSDirectory = null;
         JpegImageMetadata jpegImageMetadata = GetMetadataFromImage(imgFile);
 
-        try {
+        try (FileOutputStream fileStream = new FileOutputStream(destFile);
+                OutputStream outputStream = new BufferedOutputStream(fileStream)) {
             if (jpegImageMetadata != null) {
                 exifData = jpegImageMetadata.getExif();
             }
@@ -158,20 +159,10 @@ public class HelperClass {
                     }
                 }
 
-                try (FileOutputStream fileStream = new FileOutputStream(destFile);
-                        OutputStream outputStream = new BufferedOutputStream(fileStream)) {
-                    new ExifRewriter().updateExifMetadataLossless(imgFile, outputStream, metadataChanges);
-                } catch (Exception e) {
-                    // TODO: handle exception
-                    e.printStackTrace();
-                }
             }
-
-        } catch (ImagingException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
+            new ExifRewriter().updateExifMetadataLossless(imgFile, outputStream, metadataChanges);
+        } catch (Exception e) {
+            // TODO: handle exception
             e.printStackTrace();
         }
     }
